@@ -3,984 +3,230 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PayFlow – Secure Payments & Bank Transfers</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <title>PayFlow – Secure Payments</title>
+  <script src="https://js.stripe.com/v3/"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ========== THEME VARIABLES ========== */
     :root, [data-theme="dark"] {
       --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #818cf8;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
       --bg: #0f172a;
       --bg-card: #1e293b;
       --bg-input: #334155;
       --text: #f1f5f9;
       --text-muted: #94a3b8;
       --border: #334155;
-      --radius: 14px;
-      --shadow: 0 10px 25px -5px rgb(0 0 0 / 0.4);
-      --auth-bg: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 60%);
-      --balance-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+      --success: #10b981;
+      --danger: #ef4444;
     }
-
     [data-theme="light"] {
-      --primary: #4f46e5;
-      --primary-dark: #4338ca;
-      --primary-light: #6366f1;
-      --success: #059669;
-      --danger: #dc2626;
-      --warning: #d97706;
       --bg: #f8fafc;
       --bg-card: #ffffff;
       --bg-input: #f1f5f9;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --auth-bg: radial-gradient(ellipse at top, #e0e7ff 0%, #f8fafc 70%);
-      --balance-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       line-height: 1.5;
-      transition: background 0.25s, color 0.25s;
     }
-
-    .app { min-height: 100vh; display: flex; flex-direction: column; }
-
-    /* Theme toggle button */
     .theme-toggle {
-      position: fixed;
-      top: 18px;
-      right: 18px;
-      z-index: 200;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--bg-card);
-      color: var(--text);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      box-shadow: var(--shadow);
-      transition: all 0.2s;
+      position: fixed; top: 16px; right: 16px; z-index: 100;
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--bg-card);
+      font-size: 1.2rem; cursor: pointer;
     }
-    .theme-toggle:hover { transform: scale(1.08); }
-
-    /* ===== AUTH SCREENS ===== */
     .auth-wrapper {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: var(--auth-bg);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 24px; background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 70%);
     }
-
+    [data-theme="light"] .auth-wrapper {
+      background: radial-gradient(ellipse at top, #e0e7ff 0%, #f8fafc 70%);
+    }
     .auth-card {
-      width: 100%;
-      max-width: 420px;
-      background: var(--bg-card);
-      border-radius: 20px;
-      padding: 36px 32px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
+      width: 100%; max-width: 400px; background: var(--bg-card);
+      border-radius: 20px; padding: 32px; border: 1px solid var(--border);
     }
-
-    .logo-large {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
+    .logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
     .logo-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--primary), #a78bfa);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1.4rem;
-      color: white;
+      width: 44px; height: 44px; background: linear-gradient(135deg, #6366f1, #a78bfa);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: white; font-size: 1.3rem;
     }
-
-    .logo-text {
-      font-size: 1.75rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, var(--primary-light), #c4b5fd);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .auth-tagline {
-      text-align: center;
-      color: var(--text-muted);
-      margin-bottom: 28px;
-      font-size: 0.95rem;
-    }
-
-    .tabs {
-      display: flex;
-      background: var(--bg);
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 24px;
-    }
-
-    .tab {
-      flex: 1;
-      padding: 10px;
-      text-align: center;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      color: var(--text-muted);
-      transition: all 0.2s;
-    }
-
-    .tab.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .form-group { margin-bottom: 18px; }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: var(--text-muted);
-    }
-
+    .logo-text { font-size: 1.6rem; font-weight: 800; }
+    .tabs { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin: 20px 0; }
+    .tab { flex: 1; text-align: center; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--text-muted); }
+    .tab.active { background: var(--primary); color: white; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
     input, select {
-      width: 100%;
-      padding: 13px 16px;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
+      width: 100%; padding: 12px 14px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-input); color: var(--text);
       font-size: 1rem;
-      font-family: inherit;
-      transition: border-color 0.15s, box-shadow 0.15s;
     }
-
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-    }
-
-    input::placeholder { color: #64748b; }
-
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.15s;
+      width: 100%; padding: 13px; border: none; border-radius: 10px;
+      font-weight: 600; font-size: 1rem; cursor: pointer;
+      background: linear-gradient(135deg, #6366f1, #7c3aed); color: white;
     }
-
-    .btn:active { transform: scale(0.98); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #7c3aed);
-      color: white;
-    }
-    .btn-primary:hover:not(:disabled) {
-      filter: brightness(1.1);
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-    }
-
     .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
+      background: transparent; border: 1px solid var(--border); color: var(--text);
     }
-    .btn-outline:hover { background: var(--bg-input); }
-
-    .alert {
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      margin-bottom: 18px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .alert-error {
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-    [data-theme="light"] .alert-error {
-      color: #b91c1c;
-      background: #fef2f2;
-      border-color: #fecaca;
-    }
-
-    .alert-success {
-      background: rgba(16, 185, 129, 0.15);
-      color: #6ee7b7;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    [data-theme="light"] .alert-success {
-      color: #065f46;
-      background: #ecfdf5;
-      border-color: #a7f3d0;
-    }
-
-    .alert-info {
-      background: rgba(99, 102, 241, 0.15);
-      color: #a5b4fc;
-      border: 1px solid rgba(99, 102, 241, 0.3);
-    }
-    [data-theme="light"] .alert-info {
-      color: #3730a3;
-      background: #eef2ff;
-      border-color: #c7d2fe;
-    }
-
     .hidden { display: none !important; }
-
-    /* ===== APP SHELL ===== */
     .navbar {
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border);
     }
-
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1.2rem;
-    }
-
-    .nav-brand .logo-icon {
-      width: 36px;
-      height: 36px;
-      font-size: 1rem;
-      border-radius: 10px;
-    }
-
-    .nav-user {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .nav-user span {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), #a78bfa);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: white;
-    }
-
-    .main {
-      flex: 1;
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 28px 20px 60px;
-      width: 100%;
-    }
-
-    .page-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .page-subtitle {
-      color: var(--text-muted);
-      margin-bottom: 28px;
-      font-size: 0.95rem;
-    }
-
+    .main { max-width: 900px; margin: 0 auto; padding: 28px 20px; }
     .balance-card {
-      background: var(--balance-gradient);
-      border-radius: 18px;
-      padding: 28px;
-      margin-bottom: 28px;
-      position: relative;
-      overflow: hidden;
-      color: white;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 18px; padding: 28px; color: white; margin-bottom: 24px;
     }
-
-    .balance-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -20%;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-    }
-
-    .balance-label {
-      font-size: 0.9rem;
-      opacity: 0.9;
-      margin-bottom: 4px;
-    }
-
-    .balance-amount {
-      font-size: 2.4rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-
-    .balance-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .balance-actions .btn {
-      width: auto;
-      padding: 10px 18px;
-      font-size: 0.9rem;
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white;
-    }
-
-    .balance-actions .btn:hover {
-      background: rgba(255,255,255,0.3);
-    }
-
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-bottom: 28px;
-    }
-
+    .balance-amount { font-size: 2.3rem; font-weight: 800; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 24px;
-      border: 1px solid var(--border);
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px;
     }
-
-    .card h3 {
-      font-size: 1.05rem;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .bank-status {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px;
-      background: var(--bg);
-      border-radius: 12px;
-      margin-bottom: 12px;
-    }
-
-    .bank-info h4 { font-size: 0.95rem; margin-bottom: 2px; }
-    .bank-info p { font-size: 0.8rem; color: var(--text-muted); }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .badge-success {
-      background: rgba(16, 185, 129, 0.2);
-      color: #6ee7b7;
-    }
-    [data-theme="light"] .badge-success {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .steps {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 28px;
-      position: relative;
-    }
-
-    .steps::before {
-      content: '';
-      position: absolute;
-      top: 16px;
-      left: 15%;
-      right: 15%;
-      height: 2px;
-      background: var(--border);
-    }
-
-    .step {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      z-index: 1;
-      flex: 1;
-    }
-
-    .step-dot {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--bg);
-      border: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .step.active .step-dot {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-    }
-
-    .step.done .step-dot {
-      background: var(--success);
-      border-color: var(--success);
-      color: white;
-    }
-
-    .step-label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .step.active .step-label,
-    .step.done .step-label { color: var(--text); }
-
-    .transfer-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .transfer-tab {
-      flex: 1;
-      padding: 12px;
-      text-align: center;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      background: var(--bg);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      transition: all 0.15s;
-    }
-
-    .transfer-tab.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .amount-input-wrap {
-      position: relative;
-    }
-
-    .amount-input-wrap .currency {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .amount-input-wrap input {
-      padding-left: 36px;
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-
-    .tx-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .tx-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px;
-      background: var(--bg);
-      border-radius: 12px;
-    }
-
-    .tx-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .tx-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-    }
-
-    .tx-icon.in { background: rgba(16, 185, 129, 0.2); }
-    .tx-icon.out { background: rgba(239, 68, 68, 0.2); }
-
-    .tx-details h4 { font-size: 0.95rem; }
-    .tx-details p { font-size: 0.8rem; color: var(--text-muted); }
-
-    .tx-amount {
-      font-weight: 700;
-      font-size: 1rem;
-    }
-
-    .tx-amount.positive { color: #6ee7b7; }
-    [data-theme="light"] .tx-amount.positive { color: #059669; }
-    .tx-amount.negative { color: #fca5a5; }
-    [data-theme="light"] .tx-amount.negative { color: #dc2626; }
-
-    .bank-option {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      cursor: pointer;
-      margin-bottom: 10px;
-      transition: all 0.15s;
-    }
-
-    .bank-option:hover,
-    .bank-option.selected {
-      border-color: var(--primary);
-      background: rgba(99, 102, 241, 0.1);
-    }
-
-    .bank-logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      background: var(--bg-input);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      color: var(--primary-light);
-    }
-
-    .micro-boxes {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 16px 0;
-    }
-
-    .micro-box {
-      background: var(--bg);
-      border: 1px dashed var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .micro-box .label { font-size: 0.8rem; color: var(--text-muted); }
-    .micro-box .amount {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary-light);
-      margin-top: 4px;
-    }
-
     .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 14px 24px;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      z-index: 100;
-      transition: transform 0.3s ease;
-      font-weight: 500;
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--bg-card); border: 1px solid var(--border);
+      padding: 12px 20px; border-radius: 10px; transition: 0.3s; z-index: 200;
     }
-
     .toast.show { transform: translateX(-50%) translateY(0); }
-
-    @media (max-width: 600px) {
-      .auth-card { padding: 28px 20px; }
-      .balance-amount { font-size: 2rem; }
-      .main { padding: 20px 16px 50px; }
-      .theme-toggle { top: 12px; right: 12px; }
-    }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">🌙</button>
+  <button class="theme-toggle" id="themeToggle">☀️</button>
 
-  <div class="app" id="app">
+  <!-- AUTH SCREEN -->
+  <div id="authScreen" class="auth-wrapper">
+    <div class="auth-card">
+      <div class="logo">
+        <div class="logo-icon">P</div>
+        <div class="logo-text">PayFlow</div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);margin-bottom:8px;">Secure bank transfers</p>
 
-    <!-- AUTH SCREEN -->
-    <div id="authScreen" class="auth-wrapper">
-      <div class="auth-card">
-        <div class="logo-large">
-          <div class="logo-icon">P</div>
-          <div class="logo-text">PayFlow</div>
+      <div class="tabs">
+        <div class="tab active" data-tab="login">Log in</div>
+        <div class="tab" data-tab="signup">Sign up</div>
+      </div>
+
+      <div id="loginForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com">
         </div>
-        <p class="auth-tagline">Secure bank transfers powered by micro-deposit verification</p>
-
-        <div class="tabs">
-          <div class="tab active" data-tab="login">Log in</div>
-          <div class="tab" data-tab="signup">Sign up</div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••">
         </div>
+        <button class="btn" id="btnLogin">Log in</button>
+      </div>
 
-        <div id="loginForm">
-          <div class="alert alert-error hidden" id="loginError"></div>
-          <div class="form-group">
-            <label for="loginEmail">Email</label>
-            <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" />
-          </div>
-          <div class="form-group">
-            <label for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
-          </div>
-          <button class="btn btn-primary" id="btnLogin">Log in</button>
-          <p style="text-align:center;margin-top:16px;font-size:0.85rem;color:var(--text-muted);">
-            Demo: create an account first, then log in with those credentials
-          </p>
+      <div id="signupForm" class="hidden">
+        <div class="form-group">
+          <label>Full name</label>
+          <input type="text" id="signupName" placeholder="Alex Rivera">
         </div>
-
-        <div id="signupForm" class="hidden">
-          <div class="alert alert-error hidden" id="signupError"></div>
-          <div class="form-group">
-            <label for="signupName">Full name</label>
-            <input type="text" id="signupName" placeholder="Alex Rivera" />
-          </div>
-          <div class="form-group">
-            <label for="signupEmail">Email</label>
-            <input type="email" id="signupEmail" placeholder="you@example.com" />
-          </div>
-          <div class="form-group">
-            <label for="signupPassword">Password</label>
-            <input type="password" id="signupPassword" placeholder="At least 6 characters" />
-          </div>
-          <button class="btn btn-primary" id="btnSignup">Create account</button>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="signupEmail" placeholder="you@example.com">
         </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="At least 6 characters">
+        </div>
+        <button class="btn" id="btnSignup">Create account</button>
       </div>
     </div>
+  </div>
 
-    <!-- MAIN APP -->
-    <div id="mainApp" class="hidden">
-      <nav class="navbar">
-        <div class="nav-brand">
-          <div class="logo-icon">P</div>
-          PayFlow
-        </div>
-        <div class="nav-user">
-          <span id="userGreeting">Hi, Alex</span>
-          <div class="avatar" id="userAvatar">A</div>
-          <button class="btn btn-outline" id="btnLogout" style="width:auto;padding:8px 14px;font-size:0.85rem;">Logout</button>
-        </div>
-      </nav>
+  <!-- MAIN APP -->
+  <div id="mainApp" class="hidden">
+    <nav class="navbar">
+      <div style="display:flex;align-items:center;gap:10px;font-weight:700;">
+        <div class="logo-icon" style="width:34px;height:34px;font-size:1rem;">P</div>
+        PayFlow
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span id="userGreeting">Hi</span>
+        <button class="btn btn-outline" style="width:auto;padding:8px 14px;" id="btnLogout">Logout</button>
+      </div>
+    </nav>
 
-      <div class="main">
-        <!-- DASHBOARD -->
-        <div id="pageDashboard">
-          <h1 class="page-title">Dashboard</h1>
-          <p class="page-subtitle">Manage your balance and linked bank account</p>
+    <div class="main">
+      <!-- DASHBOARD -->
+      <div id="pageDashboard">
+        <h1 style="margin-bottom:6px;">Dashboard</h1>
+        <p style="color:var(--text-muted);margin-bottom:24px;">Manage your balance and bank accounts</p>
 
-          <div class="balance-card">
-            <div class="balance-label">Available balance</div>
-            <div class="balance-amount" id="balanceDisplay">$0.00</div>
-            <div class="balance-actions">
-              <button class="btn" id="btnGoTransfer">Transfer</button>
-              <button class="btn" id="btnGoBank">Bank Account</button>
-            </div>
-          </div>
-
-          <div class="cards-grid">
-            <div class="card">
-              <h3>🏦 Linked Bank</h3>
-              <div id="bankStatusArea">
-                <p style="color:var(--text-muted);font-size:0.9rem;">No bank account linked yet.</p>
-                <button class="btn btn-primary" id="btnLinkBank" style="margin-top:12px;">Link bank account</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>📋 Recent activity</h3>
-              <div class="tx-list" id="recentTx">
-                <p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>
-              </div>
-            </div>
+        <div class="balance-card">
+          <div style="opacity:0.9;font-size:0.9rem;">Available Balance</div>
+          <div class="balance-amount" id="balanceDisplay">$0.00</div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <button class="btn" style="width:auto;padding:10px 18px;background:rgba(255,255,255,0.2);" id="btnGoTransfer">Transfer</button>
+            <button class="btn" style="width:auto;padding:10px 18px;background:rgba(255,255,255,0.2);" id="btnGoBank">Link Bank</button>
           </div>
         </div>
 
-        <!-- BANK LINKING (TRIAL / MICRO-DEPOSIT) -->
-        <div id="pageBank" class="hidden">
-          <h1 class="page-title">Link Bank Account</h1>
-          <p class="page-subtitle">We’ll send two tiny deposits to verify ownership (trial / micro-deposit method)</p>
-
-          <div class="steps" id="bankSteps">
-            <div class="step active" data-s="1">
-              <div class="step-dot">1</div>
-              <div class="step-label">Details</div>
+        <div class="cards-grid">
+          <div class="card">
+            <h3 style="margin-bottom:12px;">Linked Banks</h3>
+            <div id="bankListArea">
+              <p style="color:var(--text-muted);font-size:0.9rem;">No banks linked yet.</p>
             </div>
-            <div class="step" data-s="2">
-              <div class="step-dot">2</div>
-              <div class="step-label">Verify</div>
-            </div>
-            <div class="step" data-s="3">
-              <div class="step-dot">3</div>
-              <div class="step-label">Done</div>
-            </div>
+            <button class="btn" style="margin-top:12px;" id="btnLinkBank">+ Link Bank Account</button>
           </div>
 
-          <div class="card" id="bankFormCard">
-            <div class="alert alert-info">
-              <span>ℹ️</span>
-              <div>
-                <strong>How micro-deposits work:</strong> Two random amounts under $1 are sent via ACH. Check your statement (1–3 business days in real life) and enter the exact amounts. This proves you own the account.
-              </div>
+          <div class="card">
+            <h3 style="margin-bottom:12px;">Recent Activity</h3>
+            <div id="recentTx">
+              <p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>
             </div>
-
-            <div class="form-group">
-              <label>Choose a bank</label>
-              <div id="bankList">
-                <div class="bank-option selected" data-name="Chase" data-routing="021000021">
-                  <div class="bank-logo">CH</div>
-                  <div>
-                    <div style="font-weight:600;">Chase</div>
-                    <div style="font-size:0.8rem;color:var(--text-muted);">Routing 021000021</div>
-                  </div>
-                </div>
-                <div class="bank-option" data-name="Bank of America" data-routing="026009593">
-                  <div class="bank-logo">BA</div>
-                  <div>
-                    <div style="font-weight:600;">Bank of America</div>
-                    <div style="font-size:0.8rem;color:var(--text-muted);">Routing 026009593</div>
-                  </div>
-                </div>
-                <div class="bank-option" data-name="Wells Fargo" data-routing="121000248">
-                  <div class="bank-logo">WF</div>
-                  <div>
-                    <div style="font-weight:600;">Wells Fargo</div>
-                    <div style="font-size:0.8rem;color:var(--text-muted);">Routing 121000248</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="accName">Account holder name</label>
-              <input type="text" id="accName" placeholder="Full legal name" />
-            </div>
-            <div class="form-group">
-              <label for="accType">Account type</label>
-              <select id="accType">
-                <option value="checking">Checking</option>
-                <option value="savings">Savings</option>
-              </select>
-            </div>
-
-            <button class="btn btn-primary" id="btnStartMicro">Start verification</button>
-            <button class="btn btn-outline" id="btnBackDash" style="margin-top:10px;">Back to dashboard</button>
-          </div>
-
-          <div class="card hidden" id="verifyCard">
-            <div class="alert alert-info" id="verifyAlert">
-              <span>⏳</span>
-              <div>Generating micro-deposits…</div>
-            </div>
-
-            <div id="demoAmounts" class="hidden">
-              <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;">Demo amounts (in production you check your real bank statement):</p>
-              <div class="micro-boxes">
-                <div class="micro-box">
-                  <div class="label">Deposit 1</div>
-                  <div class="amount" id="m1">$0.00</div>
-                </div>
-                <div class="micro-box">
-                  <div class="label">Deposit 2</div>
-                  <div class="amount" id="m2">$0.00</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="amt1">First amount ($)</label>
-              <input type="number" id="amt1" step="0.01" min="0.01" max="0.99" placeholder="0.00" />
-            </div>
-            <div class="form-group">
-              <label for="amt2">Second amount ($)</label>
-              <input type="number" id="amt2" step="0.01" min="0.01" max="0.99" placeholder="0.00" />
-            </div>
-
-            <div class="alert alert-error hidden" id="verifyError"></div>
-
-            <button class="btn btn-primary" id="btnConfirmMicro">Confirm amounts</button>
-            <button class="btn btn-outline" id="btnResendMicro" style="margin-top:10px;">Resend (demo)</button>
-          </div>
-
-          <div class="card hidden" id="bankSuccessCard">
-            <div style="text-align:center;padding:20px 0;">
-              <div style="font-size:3rem;margin-bottom:12px;">✅</div>
-              <h2 style="margin-bottom:8px;">Bank verified!</h2>
-              <p style="color:var(--text-muted);">You can now send and receive money to this account.</p>
-            </div>
-            <div class="bank-status">
-              <div class="bank-info">
-                <h4 id="verifiedName">Chase</h4>
-                <p id="verifiedMask">•••• 3210 · Checking</p>
-              </div>
-              <span class="badge badge-success">✓ Verified</span>
-            </div>
-            <button class="btn btn-primary" id="btnGoTransfersFromBank">Go to Transfers</button>
-            <button class="btn btn-outline" id="btnBackDash2" style="margin-top:10px;">Back to dashboard</button>
           </div>
         </div>
+      </div>
 
-        <!-- TRANSFERS -->
-        <div id="pageTransfer" class="hidden">
-          <h1 class="page-title">Transfers</h1>
-          <p class="page-subtitle">Send money to your linked bank or receive funds into your PayFlow balance</p>
+      <!-- BANK LINKING PAGE -->
+      <div id="pageBank" class="hidden">
+        <h1 style="margin-bottom:6px;">Link Bank Account</h1>
+        <p style="color:var(--text-muted);margin-bottom:24px;">Connect your bank using Stripe (Instant or Micro-deposit)</p>
 
-          <div class="card" id="transferLocked" style="text-align:center;padding:40px 20px;">
-            <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
-            <h3 style="margin-bottom:8px;">Bank account required</h3>
-            <p style="color:var(--text-muted);margin-bottom:20px;">Link and verify a bank account first to enable transfers.</p>
-            <button class="btn btn-primary" id="btnLinkFromTransfer">Link bank account</button>
+        <div class="card">
+          <p style="margin-bottom:16px;color:var(--text-muted);">
+            Click the button below. Stripe will open a secure flow where you can select your bank and verify it instantly or via micro-deposits.
+          </p>
+          <button class="btn" id="btnStartRealLink">Link Bank with Stripe</button>
+          <button class="btn btn-outline" style="margin-top:10px;" id="btnBackDash">Back to Dashboard</button>
+        </div>
+      </div>
+
+      <!-- TRANSFER PAGE -->
+      <div id="pageTransfer" class="hidden">
+        <h1 style="margin-bottom:6px;">Transfers</h1>
+        <p style="color:var(--text-muted);margin-bottom:24px;">Send or receive money</p>
+
+        <div class="card">
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="number" id="transferAmount" placeholder="0.00" step="0.01">
           </div>
-
-          <div id="transferActive" class="hidden">
-            <div class="transfer-tabs">
-              <div class="transfer-tab active" data-mode="receive">Receive (Add funds)</div>
-              <div class="transfer-tab" data-mode="send">Send to bank</div>
-            </div>
-
-            <div class="card">
-              <div id="receivePanel">
-                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
-                  Simulate receiving money into your PayFlow balance (like a customer payment or payout credit).
-                </p>
-                <div class="form-group">
-                  <label>Amount to receive</label>
-                  <div class="amount-input-wrap">
-                    <span class="currency">$</span>
-                    <input type="number" id="receiveAmount" step="0.01" min="1" placeholder="0.00" value="100" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="receiveNote">Note (optional)</label>
-                  <input type="text" id="receiveNote" placeholder="e.g. Customer payment #4821" />
-                </div>
-                <button class="btn btn-success" id="btnReceive">Receive funds</button>
-              </div>
-
-              <div id="sendPanel" class="hidden">
-                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
-                  Withdraw from your PayFlow balance to the verified bank account via ACH (simulated for demo).
-                </p>
-                <div class="form-group">
-                  <label>Amount to send</label>
-                  <div class="amount-input-wrap">
-                    <span class="currency">$</span>
-                    <input type="number" id="sendAmount" step="0.01" min="1" placeholder="0.00" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>Destination</label>
-                  <div class="bank-status" style="margin:0;">
-                    <div class="bank-info">
-                      <h4 id="sendBankName">Chase</h4>
-                      <p id="sendBankMask">•••• 3210</p>
-                    </div>
-                    <span class="badge badge-success">Verified</span>
-                  </div>
-                </div>
-                <button class="btn btn-primary" id="btnSend">Send to bank</button>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:20px;">
-              <h3>Transaction history</h3>
-              <div class="tx-list" id="fullHistory">
-                <p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>
-              </div>
-            </div>
-
-            <button class="btn btn-outline" id="btnBackFromTransfer" style="margin-top:16px;">Back to dashboard</button>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="transferType">
+              <option value="in">Receive (Add funds)</option>
+              <option value="out">Send to Bank (Withdraw)</option>
+            </select>
           </div>
+          <button class="btn" id="btnDoTransfer">Submit Transfer</button>
+          <button class="btn btn-outline" style="margin-top:10px;" id="btnBackFromTransfer">Back</button>
         </div>
       </div>
     </div>
@@ -989,440 +235,243 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE_KEY = 'payflow_v3';
+    // ====================== CONFIG ======================
+    const BACKEND_URL = "https://backend-mg57.onrender.com";
+    const STRIPE_PUBLISHABLE_KEY = "pk_live_YOUR_KEY_HERE"; // ← REPLACE THIS
+    const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+    // ====================== STATE ======================
     let state = {
       user: null,
       balance: 0,
-      bank: null,
-      transactions: [],
-      currentPage: 'dashboard',
-      theme: 'dark'
+      banks: [],
+      theme: "dark"
     };
 
+    // ====================== HELPERS ======================
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3000);
+    }
+
     function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem("payflow_state", JSON.stringify(state));
     }
 
     function load() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          state = { ...state, ...parsed };
-          return true;
-        }
-      } catch (e) {}
-      return false;
+      const raw = localStorage.getItem("payflow_state");
+      if (raw) state = { ...state, ...JSON.parse(raw) };
     }
 
     function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+      document.documentElement.setAttribute("data-theme", theme);
+      document.getElementById("themeToggle").textContent = theme === "dark" ? "☀️" : "🌙";
       state.theme = theme;
       save();
     }
 
-    document.getElementById('themeToggle').addEventListener('click', () => {
-      const next = state.theme === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
-    });
-
-    function toast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2800);
-    }
-
-    function formatMoney(n) {
-      return '$' + Number(n).toFixed(2);
-    }
-
-    function mask(acc) {
-      if (!acc) return '••••';
-      return '••••' + String(acc).slice(-4);
-    }
-
-    function randomMicro() {
-      return (Math.floor(Math.random() * 99) + 1) / 100;
-    }
-
-    function addTx(type, amount, note) {
-      state.transactions.unshift({
-        id: Date.now(),
-        type,
-        amount,
-        note: note || (type === 'in' ? 'Received funds' : 'Sent to bank'),
-        date: new Date().toISOString()
-      });
-      if (state.transactions.length > 50) state.transactions.pop();
-      save();
-      renderHistory();
-      renderRecent();
-      updateBalance();
-    }
-
-    function updateBalance() {
-      document.getElementById('balanceDisplay').textContent = formatMoney(state.balance);
-    }
-
-    function renderBankStatus() {
-      const area = document.getElementById('bankStatusArea');
-      if (state.bank && state.bank.verified) {
-        area.innerHTML = `
-          <div class="bank-status">
-            <div class="bank-info">
-              <h4>${state.bank.name}</h4>
-              <p>${mask(state.bank.account)} · ${state.bank.type}</p>
-            </div>
-            <span class="badge badge-success">✓ Verified</span>
-          </div>
-          <button class="btn btn-outline" id="btnManageBank" style="margin-top:8px;">Manage / Re-link</button>
-        `;
-        document.getElementById('btnManageBank')?.addEventListener('click', () => showPage('bank'));
-      } else {
-        area.innerHTML = `
-          <p style="color:var(--text-muted);font-size:0.9rem;">No bank account linked yet.</p>
-          <button class="btn btn-primary" id="btnLinkBank" style="margin-top:12px;">Link bank account</button>
-        `;
-        document.getElementById('btnLinkBank')?.addEventListener('click', () => showPage('bank'));
-      }
-    }
-
-    function renderRecent() {
-      const el = document.getElementById('recentTx');
-      if (!state.transactions.length) {
-        el.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>';
-        return;
-      }
-      el.innerHTML = state.transactions.slice(0, 4).map(tx => `
-        <div class="tx-item">
-          <div class="tx-left">
-            <div class="tx-icon ${tx.type}">${tx.type === 'in' ? '↓' : '↑'}</div>
-            <div class="tx-details">
-              <h4>${tx.note}</h4>
-              <p>${new Date(tx.date).toLocaleString()}</p>
-            </div>
-          </div>
-          <div class="tx-amount ${tx.type === 'in' ? 'positive' : 'negative'}">
-            ${tx.type === 'in' ? '+' : '-'}${formatMoney(tx.amount)}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderHistory() {
-      const el = document.getElementById('fullHistory');
-      if (!state.transactions.length) {
-        el.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>';
-        return;
-      }
-      el.innerHTML = state.transactions.map(tx => `
-        <div class="tx-item">
-          <div class="tx-left">
-            <div class="tx-icon ${tx.type}">${tx.type === 'in' ? '↓' : '↑'}</div>
-            <div class="tx-details">
-              <h4>${tx.note}</h4>
-              <p>${new Date(tx.date).toLocaleString()}</p>
-            </div>
-          </div>
-          <div class="tx-amount ${tx.type === 'in' ? 'positive' : 'negative'}">
-            ${tx.type === 'in' ? '+' : '-'}${formatMoney(tx.amount)}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function updateTransferUI() {
-      const locked = document.getElementById('transferLocked');
-      const active = document.getElementById('transferActive');
-      if (state.bank && state.bank.verified) {
-        locked.classList.add('hidden');
-        active.classList.remove('hidden');
-        document.getElementById('sendBankName').textContent = state.bank.name;
-        document.getElementById('sendBankMask').textContent = mask(state.bank.account);
-      } else {
-        locked.classList.remove('hidden');
-        active.classList.add('hidden');
-      }
-    }
-
-    function showPage(page) {
-      document.getElementById('pageDashboard').classList.add('hidden');
-      document.getElementById('pageBank').classList.add('hidden');
-      document.getElementById('pageTransfer').classList.add('hidden');
-
-      if (page === 'dashboard') {
-        document.getElementById('pageDashboard').classList.remove('hidden');
-        renderBankStatus();
-        renderRecent();
-        updateBalance();
-      } else if (page === 'bank') {
-        document.getElementById('pageBank').classList.remove('hidden');
-        if (!state.bank || !state.bank.verified) {
-          document.getElementById('bankFormCard').classList.remove('hidden');
-          document.getElementById('verifyCard').classList.add('hidden');
-          document.getElementById('bankSuccessCard').classList.add('hidden');
-          updateBankSteps(1);
-        } else {
-          document.getElementById('bankFormCard').classList.add('hidden');
-          document.getElementById('verifyCard').classList.add('hidden');
-          document.getElementById('bankSuccessCard').classList.remove('hidden');
-          document.getElementById('verifiedName').textContent = state.bank.name;
-          document.getElementById('verifiedMask').textContent = mask(state.bank.account) + ' · ' + state.bank.type;
-          updateBankSteps(3);
-        }
-      } else if (page === 'transfer') {
-        document.getElementById('pageTransfer').classList.remove('hidden');
-        updateTransferUI();
-        renderHistory();
-      }
-      state.currentPage = page;
-      save();
-    }
-
-    function updateBankSteps(n) {
-      document.querySelectorAll('#bankSteps .step').forEach(el => {
-        const s = parseInt(el.dataset.s);
-        el.classList.remove('active', 'done');
-        if (s < n) el.classList.add('done');
-        if (s === n) el.classList.add('active');
-      });
-    }
-
-    // AUTH
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const isLogin = tab.dataset.tab === 'login';
-        document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
-        document.getElementById('signupForm').classList.toggle('hidden', isLogin);
-        document.getElementById('loginError').classList.add('hidden');
-        document.getElementById('signupError').classList.add('hidden');
+    // ====================== AUTH ======================
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        const isLogin = tab.dataset.tab === "login";
+        document.getElementById("loginForm").classList.toggle("hidden", !isLogin);
+        document.getElementById("signupForm").classList.toggle("hidden", isLogin);
       });
     });
 
-    document.getElementById('btnSignup').addEventListener('click', () => {
-      const name = document.getElementById('signupName').value.trim();
-      const email = document.getElementById('signupEmail').value.trim().toLowerCase();
-      const pass = document.getElementById('signupPassword').value;
-      const err = document.getElementById('signupError');
+    document.getElementById("btnSignup").addEventListener("click", () => {
+      const name = document.getElementById("signupName").value.trim();
+      const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+      const pass = document.getElementById("signupPassword").value;
 
       if (!name || !email || pass.length < 6) {
-        err.textContent = 'Please fill all fields. Password must be at least 6 characters.';
-        err.classList.remove('hidden');
-        return;
+        return toast("Please fill all fields (password min 6 chars)");
       }
-
-      const users = JSON.parse(localStorage.getItem('payflow_users') || '{}');
-      if (users[email]) {
-        err.textContent = 'An account with this email already exists.';
-        err.classList.remove('hidden');
-        return;
-      }
-
-      users[email] = { name, email, password: pass };
-      localStorage.setItem('payflow_users', JSON.stringify(users));
 
       state.user = { name, email };
       state.balance = 0;
-      state.bank = null;
-      state.transactions = [];
+      state.banks = [];
       save();
-
       enterApp();
-      toast('Account created successfully!');
+      toast("Account created!");
     });
 
-    document.getElementById('btnLogin').addEventListener('click', () => {
-      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-      const pass = document.getElementById('loginPassword').value;
-      const err = document.getElementById('loginError');
+    document.getElementById("btnLogin").addEventListener("click", () => {
+      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+      const pass = document.getElementById("loginPassword").value;
 
-      const users = JSON.parse(localStorage.getItem('payflow_users') || '{}');
-      const user = users[email];
+      // Simple demo login (in real app use Supabase Auth)
+      if (!email || !pass) return toast("Enter email and password");
 
-      if (!user || user.password !== pass) {
-        err.textContent = 'Invalid email or password.';
-        err.classList.remove('hidden');
-        return;
-      }
-
-      state.user = { name: user.name, email: user.email };
+      state.user = { name: email.split("@")[0], email };
       save();
       enterApp();
-      toast('Welcome back!');
+      toast("Welcome back!");
     });
 
     function enterApp() {
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      document.getElementById('userGreeting').textContent = 'Hi, ' + state.user.name.split(' ')[0];
-      document.getElementById('userAvatar').textContent = state.user.name.charAt(0).toUpperCase();
-      showPage('dashboard');
+      document.getElementById("authScreen").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+      document.getElementById("userGreeting").textContent = "Hi, " + (state.user?.name || "User");
+      updateUI();
+      loadBanksFromBackend();
     }
 
-    document.getElementById('btnLogout').addEventListener('click', () => {
+    document.getElementById("btnLogout").addEventListener("click", () => {
       state.user = null;
       save();
-      document.getElementById('mainApp').classList.add('hidden');
-      document.getElementById('authScreen').classList.remove('hidden');
-      document.getElementById('loginEmail').value = '';
-      document.getElementById('loginPassword').value = '';
+      document.getElementById("mainApp").classList.add("hidden");
+      document.getElementById("authScreen").classList.remove("hidden");
     });
 
-    // NAV
-    document.getElementById('btnGoTransfer').addEventListener('click', () => showPage('transfer'));
-    document.getElementById('btnGoBank').addEventListener('click', () => showPage('bank'));
-    document.getElementById('btnBackDash').addEventListener('click', () => showPage('dashboard'));
-    document.getElementById('btnBackDash2').addEventListener('click', () => showPage('dashboard'));
-    document.getElementById('btnBackFromTransfer').addEventListener('click', () => showPage('dashboard'));
-    document.getElementById('btnLinkFromTransfer').addEventListener('click', () => showPage('bank'));
-    document.getElementById('btnGoTransfersFromBank').addEventListener('click', () => showPage('transfer'));
+    // ====================== NAVIGATION ======================
+    function showPage(page) {
+      document.getElementById("pageDashboard").classList.add("hidden");
+      document.getElementById("pageBank").classList.add("hidden");
+      document.getElementById("pageTransfer").classList.add("hidden");
+      document.getElementById("page" + page.charAt(0).toUpperCase() + page.slice(1)).classList.remove("hidden");
+    }
 
-    // BANK
-    let selectedBank = { name: 'Chase', routing: '021000021' };
+    document.getElementById("btnGoTransfer").addEventListener("click", () => showPage("transfer"));
+    document.getElementById("btnGoBank").addEventListener("click", () => showPage("bank"));
+    document.getElementById("btnLinkBank").addEventListener("click", () => showPage("bank"));
+    document.getElementById("btnBackDash").addEventListener("click", () => showPage("dashboard"));
+    document.getElementById("btnBackFromTransfer").addEventListener("click", () => showPage("dashboard"));
 
-    document.querySelectorAll('.bank-option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        document.querySelectorAll('.bank-option').forEach(o => o.classList.remove('selected'));
-        opt.classList.add('selected');
-        selectedBank = { name: opt.dataset.name, routing: opt.dataset.routing };
-      });
-    });
+    // ====================== REAL STRIPE BANK LINKING ======================
+    document.getElementById("btnStartRealLink").addEventListener("click", async () => {
+      const btn = document.getElementById("btnStartRealLink");
+      btn.disabled = true;
+      btn.textContent = "Connecting to Stripe...";
 
-    document.getElementById('btnStartMicro').addEventListener('click', () => {
-      const name = document.getElementById('accName').value.trim() || (state.user ? state.user.name : 'User');
-      const type = document.getElementById('accType').value;
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/create-setup-intent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: state.user?.email,
+            email: state.user?.email
+          })
+        });
 
-      state.bank = {
-        name: selectedBank.name,
-        routing: selectedBank.routing,
-        account: '9876543210',
-        type,
-        verified: false,
-        amount1: randomMicro(),
-        amount2: randomMicro()
-      };
-      while (state.bank.amount2 === state.bank.amount1) {
-        state.bank.amount2 = randomMicro();
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to create setup intent");
+
+        const result = await stripe.collectBankAccountForSetup({
+          clientSecret: data.clientSecret,
+          params: {
+            payment_method_type: "us_bank_account",
+            payment_method_data: {
+              billing_details: {
+                name: state.user?.name || "Account Holder",
+                email: state.user?.email
+              }
+            }
+          }
+        });
+
+        if (result.error) throw new Error(result.error.message);
+
+        if (result.setupIntent.status === "requires_confirmation") {
+          const confirm = await stripe.confirmUsBankAccountSetup(data.clientSecret);
+          if (confirm.error) throw new Error(confirm.error.message);
+
+          // Save to backend
+          await fetch(`${BACKEND_URL}/api/save-bank-account`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: state.user?.email,
+              paymentMethodId: confirm.setupIntent.payment_method,
+              customerId: data.customerId
+            })
+          });
+
+          toast("Bank linked successfully!");
+          loadBanksFromBackend();
+          showPage("dashboard");
+        }
+      } catch (err) {
+        console.error(err);
+        toast("Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Link Bank with Stripe";
       }
+    });
+
+    // ====================== LOAD BANKS ======================
+    async function loadBanksFromBackend() {
+      if (!state.user?.email) return;
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/bank-accounts/${encodeURIComponent(state.user.email)}`);
+        const data = await res.json();
+
+        state.banks = data.banks || [];
+        renderBanks();
+      } catch (err) {
+        console.error("Failed to load banks", err);
+      }
+    }
+
+    function renderBanks() {
+      const area = document.getElementById("bankListArea");
+      if (!state.banks.length) {
+        area.innerHTML = `<p style="color:var(--text-muted);font-size:0.9rem;">No banks linked yet.</p>`;
+        return;
+      }
+
+      area.innerHTML = state.banks.map(b => `
+        <div style="padding:12px;background:var(--bg);border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:600;">${b.bank_name || "Bank"}</div>
+            <div style="font-size:0.85rem;color:var(--text-muted);">•••• ${b.last4 || "****"} · ${b.account_type || ""}</div>
+          </div>
+          <span style="font-size:0.75rem;background:rgba(16,185,129,0.2);color:#6ee7b7;padding:4px 8px;border-radius:999px;">Verified</span>
+        </div>
+      `).join("");
+    }
+
+    // ====================== TRANSFER (Demo for now) ======================
+    document.getElementById("btnDoTransfer").addEventListener("click", () => {
+      const amount = parseFloat(document.getElementById("transferAmount").value);
+      const type = document.getElementById("transferType").value;
+
+      if (!amount || amount <= 0) return toast("Enter a valid amount");
+
+      if (type === "in") {
+        state.balance += amount;
+        toast(`Received $${amount.toFixed(2)}`);
+      } else {
+        if (amount > state.balance) return toast("Insufficient balance");
+        state.balance -= amount;
+        toast(`Sent $${amount.toFixed(2)} to bank`);
+      }
+
       save();
-
-      document.getElementById('bankFormCard').classList.add('hidden');
-      document.getElementById('verifyCard').classList.remove('hidden');
-      updateBankSteps(2);
-
-      document.getElementById('verifyAlert').innerHTML = '<span>⏳</span><div>Sending micro-deposits…</div>';
-      document.getElementById('demoAmounts').classList.add('hidden');
-
-      setTimeout(() => {
-        document.getElementById('m1').textContent = formatMoney(state.bank.amount1);
-        document.getElementById('m2').textContent = formatMoney(state.bank.amount2);
-        document.getElementById('demoAmounts').classList.remove('hidden');
-        document.getElementById('verifyAlert').innerHTML = `
-          <span>✅</span>
-          <div><strong>Deposits ready (demo)</strong><br>In production check your bank statement. Enter the exact amounts below.</div>
-        `;
-      }, 1000);
+      updateUI();
+      document.getElementById("transferAmount").value = "";
     });
 
-    document.getElementById('btnConfirmMicro').addEventListener('click', () => {
-      const a1 = parseFloat(document.getElementById('amt1').value);
-      const a2 = parseFloat(document.getElementById('amt2').value);
-      const err = document.getElementById('verifyError');
+    function updateUI() {
+      document.getElementById("balanceDisplay").textContent = "$" + state.balance.toFixed(2);
+      renderBanks();
+    }
 
-      if (isNaN(a1) || isNaN(a2)) {
-        err.textContent = 'Please enter both amounts.';
-        err.classList.remove('hidden');
-        return;
-      }
-
-      const match =
-        (Math.abs(a1 - state.bank.amount1) < 0.001 && Math.abs(a2 - state.bank.amount2) < 0.001) ||
-        (Math.abs(a1 - state.bank.amount2) < 0.001 && Math.abs(a2 - state.bank.amount1) < 0.001);
-
-      if (!match) {
-        err.textContent = 'Amounts do not match. Please check and try again.';
-        err.classList.remove('hidden');
-        return;
-      }
-
-      state.bank.verified = true;
-      save();
-
-      document.getElementById('verifyCard').classList.add('hidden');
-      document.getElementById('bankSuccessCard').classList.remove('hidden');
-      document.getElementById('verifiedName').textContent = state.bank.name;
-      document.getElementById('verifiedMask').textContent = mask(state.bank.account) + ' · ' + state.bank.type;
-      updateBankSteps(3);
-      toast('Bank account verified successfully!');
+    // ====================== THEME ======================
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      applyTheme(state.theme === "dark" ? "light" : "dark");
     });
 
-    document.getElementById('btnResendMicro').addEventListener('click', () => {
-      if (!state.bank) return;
-      state.bank.amount1 = randomMicro();
-      state.bank.amount2 = randomMicro();
-      while (state.bank.amount2 === state.bank.amount1) state.bank.amount2 = randomMicro();
-      save();
-      document.getElementById('m1').textContent = formatMoney(state.bank.amount1);
-      document.getElementById('m2').textContent = formatMoney(state.bank.amount2);
-      document.getElementById('amt1').value = '';
-      document.getElementById('amt2').value = '';
-      document.getElementById('verifyError').classList.add('hidden');
-      toast('New demo deposits generated');
-    });
-
-    // TRANSFERS
-    document.querySelectorAll('.transfer-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.transfer-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const mode = tab.dataset.mode;
-        document.getElementById('receivePanel').classList.toggle('hidden', mode !== 'receive');
-        document.getElementById('sendPanel').classList.toggle('hidden', mode !== 'send');
-      });
-    });
-
-    document.getElementById('btnReceive').addEventListener('click', () => {
-      const amt = parseFloat(document.getElementById('receiveAmount').value);
-      const note = document.getElementById('receiveNote').value.trim() || 'Received funds';
-      if (isNaN(amt) || amt <= 0) {
-        toast('Enter a valid amount');
-        return;
-      }
-      state.balance += amt;
-      addTx('in', amt, note);
-      toast(`Received ${formatMoney(amt)}`);
-      document.getElementById('receiveAmount').value = '100';
-      document.getElementById('receiveNote').value = '';
-    });
-
-    document.getElementById('btnSend').addEventListener('click', () => {
-      const amt = parseFloat(document.getElementById('sendAmount').value);
-      if (isNaN(amt) || amt <= 0) {
-        toast('Enter a valid amount');
-        return;
-      }
-      if (amt > state.balance) {
-        toast('Insufficient balance');
-        return;
-      }
-      state.balance -= amt;
-      addTx('out', amt, 'Withdrawal to ' + state.bank.name);
-      toast(`Sent ${formatMoney(amt)} to ${state.bank.name}`);
-      document.getElementById('sendAmount').value = '';
-    });
-
-    // INIT
-    (function init() {
-      load();
-      applyTheme(state.theme || 'dark');
-      if (state.user) {
-        enterApp();
-      }
-    })();
+    // ====================== INIT ======================
+    load();
+    applyTheme(state.theme || "dark");
+    if (state.user) enterApp();
   </script>
 </body>
 </html>
