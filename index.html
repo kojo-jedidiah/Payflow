@@ -31,25 +31,20 @@
       color: var(--text);
       min-height: 100vh;
     }
-
-    /* SIDEBAR */
     .sidebar {
       width: 260px;
       background: var(--bg-card);
       border-right: 1px solid var(--border);
       height: 100vh;
       position: fixed;
-      left: 0;
-      top: 0;
+      left: 0; top: 0;
       display: flex;
       flex-direction: column;
       padding: 20px 16px;
       z-index: 200;
       transition: transform 0.3s ease;
     }
-    .sidebar.closed {
-      transform: translateX(-100%);
-    }
+    .sidebar.closed { transform: translateX(-100%); }
     .sidebar-header {
       display: flex;
       align-items: center;
@@ -57,11 +52,7 @@
       margin-bottom: 32px;
       padding: 0 8px;
     }
-    .logo-area {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .logo-area { display: flex; align-items: center; gap: 10px; }
     .logo-icon {
       width: 38px; height: 38px;
       background: linear-gradient(135deg, #6366f1, #a78bfa);
@@ -70,62 +61,33 @@
       font-weight: 800; color: white; font-size: 1.1rem;
     }
     .close-sidebar {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.4rem;
-      cursor: pointer;
-      padding: 4px 8px;
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.4rem; cursor: pointer; padding: 4px 8px;
     }
     .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 14px;
-      border-radius: 10px;
-      color: var(--text-muted);
-      font-weight: 500;
-      font-size: 0.95rem;
-      cursor: pointer;
-      margin-bottom: 4px;
-      transition: 0.2s;
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 14px; border-radius: 10px;
+      color: var(--text-muted); font-weight: 500; font-size: 0.95rem;
+      cursor: pointer; margin-bottom: 4px; transition: 0.2s;
     }
     .nav-item:hover, .nav-item.active {
-      background: rgba(99, 102, 241, 0.15);
-      color: var(--primary);
+      background: rgba(99, 102, 241, 0.15); color: var(--primary);
     }
     .nav-item.active { font-weight: 600; }
     .sidebar-footer {
-      margin-top: auto;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
+      margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border);
     }
-
-    /* MAIN */
     .main-content {
-      margin-left: 260px;
-      min-height: 100vh;
-      padding: 24px 28px;
+      margin-left: 260px; min-height: 100vh; padding: 24px 28px;
       transition: margin-left 0.3s ease;
     }
-    .main-content.expanded {
-      margin-left: 0;
-    }
     .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 28px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;
     }
     .menu-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 42px; height: 42px;
-      border-radius: 10px;
-      font-size: 1.3rem;
-      cursor: pointer;
-      display: none;
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+      width: 42px; height: 42px; border-radius: 10px; font-size: 1.3rem;
+      cursor: pointer; display: none; align-items: center; justify-content: center;
     }
     .theme-toggle {
       width: 42px; height: 42px; border-radius: 50%;
@@ -161,9 +123,7 @@
       display: flex; justify-content: space-between; align-items: center;
       padding: 14px; background: var(--bg); border-radius: 12px; margin-bottom: 10px;
     }
-    .badge {
-      font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; font-weight: 600;
-    }
+    .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
     .badge-verified { background: rgba(16,185,129,0.2); color: #6ee7b7; }
     .badge-pending { background: rgba(234,179,8,0.2); color: #fde047; }
     .tx-in { color: #34d399; font-weight: 600; }
@@ -184,8 +144,6 @@
       z-index: 150; display: none;
     }
     .overlay.show { display: block; }
-
-    /* AUTH */
     .auth-wrapper {
       min-height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center;
       padding: 24px; background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 70%);
@@ -212,7 +170,7 @@
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-left: 0; }
-      .menu-btn { display: flex; align-items: center; justify-content: center; }
+      .menu-btn { display: flex; }
     }
   </style>
 </head>
@@ -226,67 +184,28 @@
         <div style="font-size:1.5rem;font-weight:800;">PayFlow</div>
       </div>
       <p style="text-align:center;color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;">Professional money transfers</p>
-
       <div class="tabs">
         <div class="tab active" data-tab="login">Log in</div>
         <div class="tab" data-tab="signup">Sign up</div>
       </div>
-
       <div id="loginForm">
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="loginEmail" placeholder="you@example.com">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="loginPassword" placeholder="••••••••">
-        </div>
+        <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
         <button class="btn" id="btnLogin">Log in</button>
       </div>
-
       <div id="signupForm" class="hidden">
         <div class="form-row">
-          <div class="form-group">
-            <label>First Name *</label>
-            <input type="text" id="signupFirstName" placeholder="John">
-          </div>
-          <div class="form-group">
-            <label>Last Name *</label>
-            <input type="text" id="signupLastName" placeholder="Doe">
-          </div>
+          <div class="form-group"><label>First Name *</label><input type="text" id="signupFirstName" placeholder="John"></div>
+          <div class="form-group"><label>Last Name *</label><input type="text" id="signupLastName" placeholder="Doe"></div>
         </div>
-        <div class="form-group">
-          <label>Date of Birth *</label>
-          <input type="date" id="signupDOB">
-        </div>
-        <div class="form-group">
-          <label>Email *</label>
-          <input type="email" id="signupEmail" placeholder="john@example.com">
-        </div>
-        <div class="form-group">
-          <label>Phone *</label>
-          <input type="tel" id="signupPhone" placeholder="+1 555 123 4567">
-        </div>
-        <div class="form-group">
-          <label>SSN *</label>
-          <input type="password" id="signupSSN" placeholder="XXX-XX-XXXX" maxlength="11">
-        </div>
-        <div class="form-group">
-          <label>Home Address *</label>
-          <textarea id="signupAddress" placeholder="Street, City, State, ZIP"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Password *</label>
-          <input type="password" id="signupPassword" placeholder="Minimum 8 characters">
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="consentCheck">
-          <label for="consentCheck" style="margin:0;">I consent to PayFlow collecting my information for verification and transfers.</label>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="agreementCheck">
-          <label for="agreementCheck" style="margin:0;">I agree to the Terms of Service and Privacy Policy.</label>
-        </div>
+        <div class="form-group"><label>Date of Birth *</label><input type="date" id="signupDOB"></div>
+        <div class="form-group"><label>Email *</label><input type="email" id="signupEmail" placeholder="john@example.com"></div>
+        <div class="form-group"><label>Phone *</label><input type="tel" id="signupPhone" placeholder="+1 555 123 4567"></div>
+        <div class="form-group"><label>SSN *</label><input type="password" id="signupSSN" placeholder="XXX-XX-XXXX" maxlength="11"></div>
+        <div class="form-group"><label>Home Address *</label><textarea id="signupAddress" placeholder="Street, City, State, ZIP"></textarea></div>
+        <div class="form-group"><label>Password *</label><input type="password" id="signupPassword" placeholder="Minimum 8 characters"></div>
+        <div class="checkbox-group"><input type="checkbox" id="consentCheck"><label for="consentCheck" style="margin:0;">I consent to PayFlow collecting my information for verification and transfers.</label></div>
+        <div class="checkbox-group"><input type="checkbox" id="agreementCheck"><label for="agreementCheck" style="margin:0;">I agree to the Terms of Service and Privacy Policy.</label></div>
         <button class="btn" id="btnSignup">Create Account</button>
       </div>
     </div>
@@ -296,7 +215,6 @@
   <div id="mainApp" class="hidden">
     <div class="overlay" id="overlay"></div>
 
-    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo-area">
@@ -305,21 +223,18 @@
         </div>
         <button class="close-sidebar" id="closeSidebar">✕</button>
       </div>
-
       <div class="nav-item active" data-page="dashboard">Dashboard</div>
       <div class="nav-item" data-page="send">Send Money</div>
       <div class="nav-item" data-page="receive">Receive Money</div>
       <div class="nav-item" data-page="accounts">Link Bank Account</div>
       <div class="nav-item" data-page="terms">Terms of Service</div>
       <div class="nav-item" data-page="privacy">Privacy Policy</div>
-
       <div class="sidebar-footer">
         <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;" id="userGreeting">Hi</div>
         <button class="btn btn-outline" style="padding:10px;" id="btnLogout">Logout</button>
       </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content" id="mainContent">
       <div class="topbar">
         <div style="display:flex;align-items:center;gap:12px;">
@@ -335,22 +250,16 @@
           <div style="opacity:0.9;font-size:0.9rem;margin-bottom:4px;">Available Balance</div>
           <div class="balance-amount" id="balanceDisplay">$0.00</div>
         </div>
-
         <div class="card">
           <h3 style="margin-bottom:14px;">Transaction History</h3>
-          <div id="txHistoryList">
-            <p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>
-          </div>
+          <div id="txHistoryList"><p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p></div>
         </div>
-
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
             <h3>Linked Bank Accounts</h3>
             <button class="btn" style="width:auto;padding:8px 14px;font-size:0.85rem;" id="btnShowLinkForm">+ Link Bank</button>
           </div>
-          <div id="linkedBanksList">
-            <p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p>
-          </div>
+          <div id="linkedBanksList"><p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p></div>
         </div>
       </div>
 
@@ -358,26 +267,10 @@
       <div id="pageSend" class="hidden">
         <div class="card">
           <h2 style="margin-bottom:16px;font-size:1.2rem;">Send Money</h2>
-          <div class="form-group">
-            <label>Send From</label>
-            <select id="sendFrom" disabled>
-              <option value="balance">PayFlow Balance</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Send To (Bank Account)</label>
-            <select id="sendToBank">
-              <option value="">Select a verified bank</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Amount (USD)</label>
-            <input type="number" id="sendAmount" placeholder="0.00" step="0.01" min="1">
-          </div>
-          <div class="form-group">
-            <label>Note (optional)</label>
-            <input type="text" id="sendNote" placeholder="Payment for services">
-          </div>
+          <div class="form-group"><label>Send From</label><select id="sendFrom" disabled><option value="balance">PayFlow Balance</option></select></div>
+          <div class="form-group"><label>Send To (Bank Account)</label><select id="sendToBank"><option value="">Select a verified bank</option></select></div>
+          <div class="form-group"><label>Amount (USD)</label><input type="number" id="sendAmount" placeholder="0.00" step="0.01" min="1"></div>
+          <div class="form-group"><label>Note (optional)</label><input type="text" id="sendNote" placeholder="Payment for services"></div>
           <button class="btn" id="btnSendMoney">Send Money via ACH</button>
           <div id="sendReceipt" class="receipt hidden"></div>
         </div>
@@ -387,13 +280,8 @@
       <div id="pageReceive" class="hidden">
         <div class="card">
           <h2 style="margin-bottom:16px;font-size:1.2rem;">Receive Money</h2>
-          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
-            Pull money from your linked bank into your PayFlow balance.
-          </p>
-          <div class="form-group">
-            <label>Amount (USD)</label>
-            <input type="number" id="receiveAmount" placeholder="0.00" step="0.01" value="100">
-          </div>
+          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Pull money from your linked bank into your PayFlow balance.</p>
+          <div class="form-group"><label>Amount (USD)</label><input type="number" id="receiveAmount" placeholder="0.00" step="0.01" value="100"></div>
           <button class="btn btn-success" id="btnReceiveMoney">Receive Funds via ACH</button>
           <div id="receiveReceipt" class="receipt hidden"></div>
         </div>
@@ -403,45 +291,30 @@
       <div id="pageAccounts" class="hidden">
         <div class="card" id="linkBankForm">
           <h3 style="margin-bottom:16px;">Link Bank Account</h3>
-          <div class="form-group">
-            <label>Account Holder Name</label>
-            <input type="text" id="bankName" placeholder="John Doe">
-          </div>
-          <div class="form-group">
-            <label>Routing Number</label>
-            <input type="text" id="routingNumber" placeholder="122105278" maxlength="9">
-          </div>
-          <div class="form-group">
-            <label>Account Number</label>
-            <input type="text" id="accountNumber" placeholder="Account number">
-          </div>
-          <div class="form-group">
-            <label>Account Type</label>
-            <select id="accountType">
-              <option value="checking">Checking</option>
-              <option value="savings">Savings</option>
-            </select>
-          </div>
+          <div class="form-group"><label>Account Holder Name</label><input type="text" id="bankName" placeholder="John Doe"></div>
+          <div class="form-group"><label>Routing Number</label><input type="text" id="routingNumber" placeholder="122105278" maxlength="9"></div>
+          <div class="form-group"><label>Account Number</label><input type="text" id="accountNumber" placeholder="Account number"></div>
+          <div class="form-group"><label>Account Type</label><select id="accountType"><option value="checking">Checking</option><option value="savings">Savings</option></select></div>
           <button class="btn" id="btnAddBank">Add Bank & Start Micro-Deposits</button>
         </div>
 
         <div class="card" id="verifyMicroForm" style="display:none;">
           <h3 style="margin-bottom:12px;">Verify Micro-Deposits</h3>
-          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
-            Enter the two small amounts that appeared in your bank account.
-          </p>
+          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Enter the two small amounts that appeared in your bank account.</p>
           <div class="form-row">
-            <div class="form-group">
-              <label>Amount 1</label>
-              <input type="number" id="amount1" placeholder="0.00" step="0.01">
-            </div>
-            <div class="form-group">
-              <label>Amount 2</label>
-              <input type="number" id="amount2" placeholder="0.00" step="0.01">
-            </div>
+            <div class="form-group"><label>Amount 1</label><input type="number" id="amount1" placeholder="0.00" step="0.01"></div>
+            <div class="form-group"><label>Amount 2</label><input type="number" id="amount2" placeholder="0.00" step="0.01"></div>
           </div>
           <input type="hidden" id="currentFundingSourceId">
           <button class="btn" id="btnVerifyMicro">Verify Bank Account</button>
+        </div>
+
+        <!-- My Linked Accounts -->
+        <div class="card" style="margin-top:8px;">
+          <h3 style="margin-bottom:14px;">My Linked Accounts</h3>
+          <div id="accountsPageBankList">
+            <p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p>
+          </div>
         </div>
       </div>
 
@@ -454,7 +327,6 @@
           <p style="margin-bottom:12px;"><strong>1. Service</strong><br>PayFlow allows users to link bank accounts and initiate ACH transfers.</p>
           <p style="margin-bottom:12px;"><strong>2. Bank Linking</strong><br>By linking a bank account you authorize PayFlow and Dwolla to verify ownership and process ACH transfers.</p>
           <p style="margin-bottom:12px;"><strong>3. Dwolla</strong><br>You also agree to Dwolla’s Terms of Service.</p>
-          <p style="margin-bottom:12px;"><strong>4. Prohibited Use</strong><br>You may not use the Service for illegal activities or fraud.</p>
           <p>Full Terms are also available at <a href="/terms.html" style="color:#818cf8;">/terms.html</a></p>
         </div>
       </div>
@@ -464,9 +336,8 @@
         <div class="card">
           <h2 style="margin-bottom:16px;">Privacy Policy</h2>
           <p style="color:var(--text-muted);margin-bottom:12px;">Last updated: August 29, 2026</p>
-          <p style="margin-bottom:12px;">We collect account information, identity information (including SSN and date of birth), bank account details, and transaction data to provide the Service.</p>
+          <p style="margin-bottom:12px;">We collect account information, identity information (including SSN and date of birth), bank account details, and transaction data.</p>
           <p style="margin-bottom:12px;">We use Dwolla to process bank verification and ACH transfers.</p>
-          <p style="margin-bottom:12px;">We do not sell your personal information.</p>
           <p>Full Privacy Policy is available at <a href="/privacy.html" style="color:#818cf8;">/privacy.html</a></p>
         </div>
       </div>
@@ -487,10 +358,9 @@
       theme: localStorage.getItem("payflow_theme") || "dark"
     };
 
-    // Sidebar open/close
+    // Sidebar
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("overlay");
-    const mainContent = document.getElementById("mainContent");
 
     document.getElementById("openSidebar").addEventListener("click", () => {
       sidebar.classList.add("open");
@@ -629,21 +499,12 @@
       item.addEventListener("click", () => {
         document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
         item.classList.add("active");
-
         const page = item.dataset.page;
-        ["pageDashboard", "pageSend", "pageReceive", "pageAccounts", "pageTerms", "pagePrivacy"].forEach(id => {
+        ["pageDashboard","pageSend","pageReceive","pageAccounts","pageTerms","pagePrivacy"].forEach(id => {
           document.getElementById(id).classList.add("hidden");
         });
         document.getElementById("page" + page.charAt(0).toUpperCase() + page.slice(1)).classList.remove("hidden");
-
-        const titles = {
-          dashboard: "Dashboard",
-          send: "Send Money",
-          receive: "Receive Money",
-          accounts: "Link Bank Account",
-          terms: "Terms of Service",
-          privacy: "Privacy Policy"
-        };
+        const titles = { dashboard:"Dashboard", send:"Send Money", receive:"Receive Money", accounts:"Link Bank Account", terms:"Terms of Service", privacy:"Privacy Policy" };
         document.getElementById("pageTitle").textContent = titles[page] || "PayFlow";
         closeSidebar();
       });
@@ -652,28 +513,85 @@
     document.getElementById("btnShowLinkForm").addEventListener("click", () => {
       document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
       document.querySelector('[data-page="accounts"]').classList.add("active");
-      ["pageDashboard", "pageSend", "pageReceive", "pageAccounts", "pageTerms", "pagePrivacy"].forEach(id => {
+      ["pageDashboard","pageSend","pageReceive","pageAccounts","pageTerms","pagePrivacy"].forEach(id => {
         document.getElementById(id).classList.add("hidden");
       });
       document.getElementById("pageAccounts").classList.remove("hidden");
       document.getElementById("pageTitle").textContent = "Link Bank Account";
     });
 
-    // The rest of the bank linking, send, receive, history logic remains the same as previous version...
-    // (Add Bank, Verify Micro, loadBanks, renderBanks, renderHistory, Send Money, Receive Money)
+    // Add Bank
+    document.getElementById("btnAddBank").addEventListener("click", async () => {
+      const btn = document.getElementById("btnAddBank");
+      btn.disabled = true; btn.textContent = "Processing...";
+      try {
+        if (!state.dwollaCustomerId) {
+          const res = await fetch(`${BACKEND_URL}/api/create-customer`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ firstName: state.user?.firstName || "User", lastName: state.user?.lastName || "Account", email: state.user?.email })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          state.dwollaCustomerId = data.customerId; save();
+        }
+        const routingNumber = document.getElementById("routingNumber").value.trim();
+        const accountNumber = document.getElementById("accountNumber").value.trim();
+        const bankAccountType = document.getElementById("accountType").value;
+        const name = document.getElementById("bankName").value.trim() || "My Bank Account";
+        if (!routingNumber || !accountNumber) throw new Error("Routing and account number required");
 
-    // For brevity in this response, the full working JS for those features is identical to the previous full version.
-    // You can keep the previous JS functions for:
-    // - btnAddBank
-    // - btnVerifyMicro
-    // - loadBanks / renderBanks
-    // - renderHistory
-    // - btnSendMoney
-    // - btnReceiveMoney
-    // - updateUI
-    // - themeToggle
+        const addRes = await fetch(`${BACKEND_URL}/api/add-funding-source`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ customerId: state.dwollaCustomerId, routingNumber, accountNumber, bankAccountType, name, userId: state.user?.email })
+        });
+        const addData = await addRes.json();
+        if (!addRes.ok) throw new Error(addData.error || "Failed to add bank");
 
-    // Quick versions of key functions:
+        await fetch(`${BACKEND_URL}/api/initiate-micro-deposits`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fundingSourceId: addData.fundingSourceId })
+        });
+
+        document.getElementById("currentFundingSourceId").value = addData.fundingSourceId;
+        document.getElementById("linkBankForm").style.display = "none";
+        document.getElementById("verifyMicroForm").style.display = "block";
+        toast("Micro-deposits initiated!");
+        loadBanks();
+      } catch (err) {
+        console.error(err); toast("Error: " + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "Add Bank & Start Micro-Deposits";
+      }
+    });
+
+    // Verify Micro
+    document.getElementById("btnVerifyMicro").addEventListener("click", async () => {
+      const btn = document.getElementById("btnVerifyMicro");
+      btn.disabled = true; btn.textContent = "Verifying...";
+      try {
+        const fundingSourceId = document.getElementById("currentFundingSourceId").value;
+        const amount1 = document.getElementById("amount1").value;
+        const amount2 = document.getElementById("amount2").value;
+        if (!amount1 || !amount2) throw new Error("Enter both amounts");
+
+        const res = await fetch(`${BACKEND_URL}/api/verify-micro-deposits`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fundingSourceId, amount1, amount2 })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Verification failed");
+
+        toast("Bank verified successfully!");
+        document.getElementById("verifyMicroForm").style.display = "none";
+        document.getElementById("linkBankForm").style.display = "block";
+        loadBanks();
+      } catch (err) {
+        console.error(err); toast("Error: " + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "Verify Bank Account";
+      }
+    });
+
     async function loadBanks() {
       if (!state.user?.email) return;
       try {
@@ -686,13 +604,18 @@
 
     function renderBanks() {
       const list = document.getElementById("linkedBanksList");
+      const accountsList = document.getElementById("accountsPageBankList");
       const select = document.getElementById("sendToBank");
+
       if (!state.banks.length) {
-        list.innerHTML = `<p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p>`;
+        const empty = `<p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p>`;
+        if (list) list.innerHTML = empty;
+        if (accountsList) accountsList.innerHTML = empty;
         select.innerHTML = `<option value="">No linked banks</option>`;
         return;
       }
-      list.innerHTML = state.banks.map(b => `
+
+      const html = state.banks.map(b => `
         <div class="bank-item">
           <div>
             <div style="font-weight:600;">${b.bank_name || "Bank Account"}</div>
@@ -703,6 +626,10 @@
           </span>
         </div>
       `).join("");
+
+      if (list) list.innerHTML = html;
+      if (accountsList) accountsList.innerHTML = html;
+
       const verified = state.banks.filter(b => b.status === 'verified');
       select.innerHTML = verified.length
         ? verified.map(b => `<option value="${b.stripe_payment_method_id}">${b.bank_name || "Bank"} •••• ${b.last4 || ""}</option>`).join("")
@@ -721,12 +648,79 @@
             <div style="font-weight:600;">${tx.note}</div>
             <div style="font-size:0.8rem;color:var(--text-muted);">${tx.date}</div>
           </div>
-          <div class="${tx.type === 'in' ? 'tx-in' : 'tx-out'}">
-            ${tx.type === 'in' ? '+' : '-'}${formatMoney(tx.amount)}
-          </div>
+          <div class="${tx.type === 'in' ? 'tx-in' : 'tx-out'}">${tx.type === 'in' ? '+' : '-'}${formatMoney(tx.amount)}</div>
         </div>
       `).join("");
     }
+
+    // Send Money
+    document.getElementById("btnSendMoney").addEventListener("click", async () => {
+      const btn = document.getElementById("btnSendMoney");
+      const amount = parseFloat(document.getElementById("sendAmount").value);
+      const fundingSourceId = document.getElementById("sendToBank").value;
+      const note = document.getElementById("sendNote").value || "Sent via ACH";
+      if (!amount || amount <= 0) return toast("Enter a valid amount");
+      if (amount > state.balance) return toast("Insufficient balance");
+      if (!fundingSourceId) return toast("Select a verified bank account");
+
+      btn.disabled = true; btn.textContent = "Sending...";
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/create-transfer`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sourceFundingSourceId: fundingSourceId, amount, userId: state.user?.email, note })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Transfer failed");
+
+        state.balance -= amount;
+        const tx = addTransaction('out', amount, note);
+        save(); updateUI();
+
+        const receipt = document.getElementById("sendReceipt");
+        receipt.classList.remove("hidden");
+        receipt.innerHTML = `<strong>Transfer Receipt</strong><br>Amount: ${formatMoney(amount)}<br>From: PayFlow Balance<br>To: Linked Bank<br>Status: Initiated<br>Ref: ${data.transferId || tx.id}<br>Date: ${tx.date}`;
+        toast(`Successfully sent ${formatMoney(amount)}`);
+        document.getElementById("sendAmount").value = "";
+        document.getElementById("sendNote").value = "";
+      } catch (err) {
+        console.error(err); toast("Error: " + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "Send Money via ACH";
+      }
+    });
+
+    // Receive Money
+    document.getElementById("btnReceiveMoney").addEventListener("click", async () => {
+      const btn = document.getElementById("btnReceiveMoney");
+      const amount = parseFloat(document.getElementById("receiveAmount").value);
+      if (!amount || amount <= 0) return toast("Enter a valid amount");
+      const verifiedBank = state.banks.find(b => b.status === 'verified');
+      if (!verifiedBank) return toast("Please link and verify a bank first");
+
+      btn.disabled = true; btn.textContent = "Processing...";
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/receive-money`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fundingSourceId: verifiedBank.stripe_payment_method_id, amount, userId: state.user?.email, note: "Received via ACH" })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to receive");
+
+        state.balance += amount;
+        const tx = addTransaction('in', amount, "Received via ACH");
+        save(); updateUI();
+
+        const receipt = document.getElementById("receiveReceipt");
+        receipt.classList.remove("hidden");
+        receipt.innerHTML = `<strong>Receive Receipt</strong><br>Amount: ${formatMoney(amount)}<br>From: Linked Bank<br>To: PayFlow Balance<br>Status: Initiated<br>Ref: ${data.transferId || tx.id}<br>Date: ${tx.date}`;
+        toast(`Successfully received ${formatMoney(amount)}`);
+        document.getElementById("receiveAmount").value = "100";
+      } catch (err) {
+        console.error(err); toast("Error: " + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = "Receive Funds via ACH";
+      }
+    });
 
     function updateUI() {
       document.getElementById("balanceDisplay").textContent = formatMoney(state.balance);
@@ -737,10 +731,6 @@
     document.getElementById("themeToggle").addEventListener("click", () => {
       applyTheme(state.theme === "dark" ? "light" : "dark");
     });
-
-    // Note: For the complete Send / Receive / Add Bank / Verify functions, 
-    // use the exact same code from the previous full version I sent you.
-    // They work the same way.
 
     load();
     applyTheme(state.theme);
