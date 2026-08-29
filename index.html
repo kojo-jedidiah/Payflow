@@ -120,7 +120,7 @@
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
       background: var(--bg-card); border: 1px solid var(--border);
       padding: 12px 20px; border-radius: 10px; transition: 0.3s; z-index: 200;
-      font-weight: 500; max-width: 90%;
+      font-weight: 500; max-width: 90%; text-align: center;
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
     @media (max-width: 600px) {
@@ -131,7 +131,7 @@
 <body>
   <button class="theme-toggle" id="themeToggle">☀️</button>
 
-  <!-- AUTH SCREEN -->
+  <!-- AUTH -->
   <div id="authScreen" class="auth-wrapper">
     <div class="auth-card">
       <div class="logo">
@@ -240,15 +240,15 @@
 
       <!-- RECEIVE MONEY -->
       <div id="pageReceive" class="card hidden">
-        <h2 style="margin-bottom:16px;font-size:1.2rem;">Receive Money</h2>
+        <h2 style="margin-bottom:16px;font-size:1.2rem;">Receive Money (ACH)</h2>
         <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
-          Add funds to your PayFlow balance (simulated for now).
+          Pull money from your linked bank account into your PayFlow balance.
         </p>
         <div class="form-group">
           <label>Amount (USD)</label>
           <input type="number" id="receiveAmount" placeholder="0.00" step="0.01" value="100">
         </div>
-        <button class="btn btn-success" id="btnReceiveMoney">Receive Funds</button>
+        <button class="btn btn-success" id="btnReceiveMoney">Receive Funds via ACH</button>
       </div>
 
       <!-- MY ACCOUNTS -->
@@ -263,10 +263,8 @@
           </div>
         </div>
 
-        <!-- LINK BANK FORM -->
         <div class="card" id="linkBankForm" style="display:none;">
           <h3 style="margin-bottom:16px;">Link Bank Account (Micro-Deposits)</h3>
-          
           <div class="form-group">
             <label>Account Holder Name</label>
             <input type="text" id="bankName" placeholder="John Doe">
@@ -286,16 +284,14 @@
               <option value="savings">Savings</option>
             </select>
           </div>
-
           <button class="btn" id="btnAddBank">Add Bank & Start Micro-Deposits</button>
           <button class="btn btn-outline" style="margin-top:10px;" id="btnCancelLink">Cancel</button>
         </div>
 
-        <!-- VERIFY MICRO-DEPOSITS -->
         <div class="card" id="verifyMicroForm" style="display:none;">
           <h3 style="margin-bottom:12px;">Verify Micro-Deposits</h3>
           <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
-            Two small deposits were sent to your bank. Enter the exact amounts below (usually within 1–2 business days).
+            Two small deposits were sent to your bank. Enter the exact amounts below.
           </p>
           <div class="form-row">
             <div class="form-group">
@@ -359,7 +355,7 @@
       return "$" + Number(n).toFixed(2);
     }
 
-    // ===== AUTH TABS =====
+    // Auth tabs
     document.querySelectorAll(".tab").forEach(tab => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -370,7 +366,7 @@
       });
     });
 
-    // ===== SIGN UP =====
+    // Signup
     document.getElementById("btnSignup").addEventListener("click", async () => {
       const firstName = document.getElementById("signupFirstName").value.trim();
       const lastName = document.getElementById("signupLastName").value.trim();
@@ -406,7 +402,7 @@
       }
     });
 
-    // ===== LOGIN =====
+    // Login
     document.getElementById("btnLogin").addEventListener("click", () => {
       const email = document.getElementById("loginEmail").value.trim().toLowerCase();
       const pass = document.getElementById("loginPassword").value;
@@ -433,7 +429,7 @@
       document.getElementById("authScreen").classList.remove("hidden");
     });
 
-    // ===== PAGE TABS =====
+    // Page tabs
     document.querySelectorAll(".nav-tab").forEach(tab => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
@@ -448,7 +444,7 @@
       });
     });
 
-    // ===== LINK BANK =====
+    // Link Bank
     document.getElementById("btnShowLinkForm").addEventListener("click", () => {
       document.getElementById("linkBankForm").style.display = "block";
       document.getElementById("verifyMicroForm").style.display = "none";
@@ -484,9 +480,7 @@
         const bankAccountType = document.getElementById("accountType").value;
         const name = document.getElementById("bankName").value.trim() || "My Bank Account";
 
-        if (!routingNumber || !accountNumber) {
-          throw new Error("Routing number and account number are required");
-        }
+        if (!routingNumber || !accountNumber) throw new Error("Routing number and account number are required");
 
         const addRes = await fetch(`${BACKEND_URL}/api/add-funding-source`, {
           method: "POST",
@@ -524,7 +518,7 @@
       }
     });
 
-    // ===== VERIFY MICRO-DEPOSITS =====
+    // Verify Micro-deposits
     document.getElementById("btnVerifyMicro").addEventListener("click", async () => {
       const btn = document.getElementById("btnVerifyMicro");
       btn.disabled = true;
@@ -557,7 +551,7 @@
       }
     });
 
-    // ===== LOAD BANKS =====
+    // Load banks
     async function loadBanks() {
       if (!state.user?.email) return;
       try {
@@ -592,13 +586,13 @@
         </div>
       `).join("");
 
-      const verifiedBanks = state.banks.filter(b => b.status === 'verified');
-      select.innerHTML = verifiedBanks.length
-        ? verifiedBanks.map(b => `<option value="${b.stripe_payment_method_id}">${b.bank_name || "Bank"} •••• ${b.last4 || ""}</option>`).join("")
+      const verified = state.banks.filter(b => b.status === 'verified');
+      select.innerHTML = verified.length
+        ? verified.map(b => `<option value="${b.stripe_payment_method_id}">${b.bank_name || "Bank"} •••• ${b.last4 || ""}</option>`).join("")
         : `<option value="">No verified banks</option>`;
     }
 
-    // ===== REAL ACH SEND MONEY =====
+    // ===== SEND MONEY (ACH) =====
     document.getElementById("btnSendMoney").addEventListener("click", async () => {
       const btn = document.getElementById("btnSendMoney");
       const amount = parseFloat(document.getElementById("sendAmount").value);
@@ -618,20 +612,18 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sourceFundingSourceId: fundingSourceId,
-            amount: amount,
+            amount,
             userId: state.user?.email,
-            note: note
+            note
           })
         });
-
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Transfer failed");
 
         state.balance -= amount;
         save();
         updateUI();
-
-        toast(`ACH Transfer of ${formatMoney(amount)} initiated successfully!`);
+        toast(`ACH Transfer of ${formatMoney(amount)} initiated!`);
         document.getElementById("sendAmount").value = "";
         document.getElementById("sendNote").value = "";
       } catch (err) {
@@ -643,14 +635,49 @@
       }
     });
 
-    // ===== RECEIVE (Demo) =====
-    document.getElementById("btnReceiveMoney").addEventListener("click", () => {
+    // ===== RECEIVE MONEY (ACH) =====
+    document.getElementById("btnReceiveMoney").addEventListener("click", async () => {
+      const btn = document.getElementById("btnReceiveMoney");
       const amount = parseFloat(document.getElementById("receiveAmount").value);
+
       if (!amount || amount <= 0) return toast("Enter a valid amount");
-      state.balance += amount;
-      save();
-      updateUI();
-      toast(`Received ${formatMoney(amount)}`);
+
+      const verifiedBank = state.banks.find(b => b.status === 'verified');
+      if (!verifiedBank) {
+        return toast("Please link and verify a bank account first");
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Processing ACH...";
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/receive-money`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fundingSourceId: verifiedBank.stripe_payment_method_id,
+            amount,
+            userId: state.user?.email,
+            note: "Funds added to PayFlow"
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to receive money");
+
+        state.balance += amount;
+        save();
+        updateUI();
+
+        toast(`Successfully received ${formatMoney(amount)} via ACH`);
+        document.getElementById("receiveAmount").value = "100";
+      } catch (err) {
+        console.error(err);
+        toast("Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Receive Funds via ACH";
+      }
     });
 
     function updateUI() {
@@ -658,11 +685,12 @@
       renderBanks();
     }
 
-    // ===== THEME + INIT =====
+    // Theme
     document.getElementById("themeToggle").addEventListener("click", () => {
       applyTheme(state.theme === "dark" ? "light" : "dark");
     });
 
+    // Init
     load();
     applyTheme(state.theme);
     if (state.user) enterApp();
