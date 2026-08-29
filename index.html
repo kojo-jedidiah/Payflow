@@ -120,6 +120,7 @@
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
       background: var(--bg-card); border: 1px solid var(--border);
       padding: 12px 20px; border-radius: 10px; transition: 0.3s; z-index: 200;
+      font-weight: 500; max-width: 90%;
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
     @media (max-width: 600px) {
@@ -130,7 +131,7 @@
 <body>
   <button class="theme-toggle" id="themeToggle">☀️</button>
 
-  <!-- AUTH -->
+  <!-- AUTH SCREEN -->
   <div id="authScreen" class="auth-wrapper">
     <div class="auth-card">
       <div class="logo">
@@ -217,9 +218,9 @@
         <div class="nav-tab" data-page="accounts">My Accounts</div>
       </div>
 
-      <!-- SEND -->
+      <!-- SEND MONEY -->
       <div id="pageSend" class="card">
-        <h2 style="margin-bottom:16px;font-size:1.2rem;">Send Money</h2>
+        <h2 style="margin-bottom:16px;font-size:1.2rem;">Send Money (ACH)</h2>
         <div class="form-group">
           <label>Amount (USD)</label>
           <input type="number" id="sendAmount" placeholder="0.00" step="0.01" min="1">
@@ -227,15 +228,22 @@
         <div class="form-group">
           <label>To Bank Account</label>
           <select id="sendToBank">
-            <option value="">Select linked bank</option>
+            <option value="">Select a verified bank</option>
           </select>
         </div>
-        <button class="btn" id="btnSendMoney">Send Money</button>
+        <div class="form-group">
+          <label>Note (optional)</label>
+          <input type="text" id="sendNote" placeholder="Payment for services">
+        </div>
+        <button class="btn" id="btnSendMoney">Send Money via ACH</button>
       </div>
 
-      <!-- RECEIVE -->
+      <!-- RECEIVE MONEY -->
       <div id="pageReceive" class="card hidden">
         <h2 style="margin-bottom:16px;font-size:1.2rem;">Receive Money</h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
+          Add funds to your PayFlow balance (simulated for now).
+        </p>
         <div class="form-group">
           <label>Amount (USD)</label>
           <input type="number" id="receiveAmount" placeholder="0.00" step="0.01" value="100">
@@ -287,7 +295,7 @@
         <div class="card" id="verifyMicroForm" style="display:none;">
           <h3 style="margin-bottom:12px;">Verify Micro-Deposits</h3>
           <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
-            Two small deposits were sent to your bank. Enter the exact amounts below (usually within 1-2 business days).
+            Two small deposits were sent to your bank. Enter the exact amounts below (usually within 1–2 business days).
           </p>
           <div class="form-row">
             <div class="form-group">
@@ -323,7 +331,7 @@
       const t = document.getElementById("toast");
       t.textContent = msg;
       t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 3500);
+      setTimeout(() => t.classList.remove("show"), 3800);
     }
 
     function save() {
@@ -351,7 +359,7 @@
       return "$" + Number(n).toFixed(2);
     }
 
-    // Auth tabs
+    // ===== AUTH TABS =====
     document.querySelectorAll(".tab").forEach(tab => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -362,7 +370,7 @@
       });
     });
 
-    // Signup
+    // ===== SIGN UP =====
     document.getElementById("btnSignup").addEventListener("click", async () => {
       const firstName = document.getElementById("signupFirstName").value.trim();
       const lastName = document.getElementById("signupLastName").value.trim();
@@ -378,7 +386,6 @@
       if (!consent || !agreement) return toast("You must accept the consent and agreement");
 
       try {
-        // Create Dwolla customer
         const res = await fetch(`${BACKEND_URL}/api/create-customer`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -399,7 +406,7 @@
       }
     });
 
-    // Login
+    // ===== LOGIN =====
     document.getElementById("btnLogin").addEventListener("click", () => {
       const email = document.getElementById("loginEmail").value.trim().toLowerCase();
       const pass = document.getElementById("loginPassword").value;
@@ -426,7 +433,7 @@
       document.getElementById("authScreen").classList.remove("hidden");
     });
 
-    // Page tabs
+    // ===== PAGE TABS =====
     document.querySelectorAll(".nav-tab").forEach(tab => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
@@ -441,7 +448,7 @@
       });
     });
 
-    // Show link form
+    // ===== LINK BANK =====
     document.getElementById("btnShowLinkForm").addEventListener("click", () => {
       document.getElementById("linkBankForm").style.display = "block";
       document.getElementById("verifyMicroForm").style.display = "none";
@@ -450,7 +457,6 @@
       document.getElementById("linkBankForm").style.display = "none";
     });
 
-    // Add Bank + Initiate Micro-deposits
     document.getElementById("btnAddBank").addEventListener("click", async () => {
       const btn = document.getElementById("btnAddBank");
       btn.disabled = true;
@@ -458,7 +464,6 @@
 
       try {
         if (!state.dwollaCustomerId) {
-          // Create customer if missing
           const res = await fetch(`${BACKEND_URL}/api/create-customer`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -483,7 +488,6 @@
           throw new Error("Routing number and account number are required");
         }
 
-        // Add funding source
         const addRes = await fetch(`${BACKEND_URL}/api/add-funding-source`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -499,7 +503,6 @@
         const addData = await addRes.json();
         if (!addRes.ok) throw new Error(addData.error || "Failed to add bank");
 
-        // Initiate micro-deposits
         await fetch(`${BACKEND_URL}/api/initiate-micro-deposits`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -510,7 +513,7 @@
         document.getElementById("linkBankForm").style.display = "none";
         document.getElementById("verifyMicroForm").style.display = "block";
 
-        toast("Micro-deposits initiated! Check your bank in 1-2 days.");
+        toast("Micro-deposits initiated! Check your bank in 1–2 days.");
         loadBanks();
       } catch (err) {
         console.error(err);
@@ -521,7 +524,7 @@
       }
     });
 
-    // Verify Micro-deposits
+    // ===== VERIFY MICRO-DEPOSITS =====
     document.getElementById("btnVerifyMicro").addEventListener("click", async () => {
       const btn = document.getElementById("btnVerifyMicro");
       btn.disabled = true;
@@ -554,7 +557,7 @@
       }
     });
 
-    // Load banks
+    // ===== LOAD BANKS =====
     async function loadBanks() {
       if (!state.user?.email) return;
       try {
@@ -589,26 +592,58 @@
         </div>
       `).join("");
 
-      select.innerHTML = state.banks
-        .filter(b => b.status === 'verified')
-        .map(b => `<option value="${b.id}">${b.bank_name || "Bank"} •••• ${b.last4 || ""}</option>`)
-        .join("") || `<option value="">No verified banks</option>`;
+      const verifiedBanks = state.banks.filter(b => b.status === 'verified');
+      select.innerHTML = verifiedBanks.length
+        ? verifiedBanks.map(b => `<option value="${b.stripe_payment_method_id}">${b.bank_name || "Bank"} •••• ${b.last4 || ""}</option>`).join("")
+        : `<option value="">No verified banks</option>`;
     }
 
-    // Send / Receive (demo for now)
-    document.getElementById("btnSendMoney").addEventListener("click", () => {
+    // ===== REAL ACH SEND MONEY =====
+    document.getElementById("btnSendMoney").addEventListener("click", async () => {
+      const btn = document.getElementById("btnSendMoney");
       const amount = parseFloat(document.getElementById("sendAmount").value);
+      const fundingSourceId = document.getElementById("sendToBank").value;
+      const note = document.getElementById("sendNote").value || "PayFlow ACH Transfer";
+
       if (!amount || amount <= 0) return toast("Enter a valid amount");
       if (amount > state.balance) return toast("Insufficient balance");
-      if (!state.banks.some(b => b.status === 'verified')) return toast("Please verify a bank first");
+      if (!fundingSourceId) return toast("Please select a verified bank account");
 
-      state.balance -= amount;
-      save();
-      updateUI();
-      toast(`Sent ${formatMoney(amount)}`);
-      document.getElementById("sendAmount").value = "";
+      btn.disabled = true;
+      btn.textContent = "Sending via ACH...";
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/create-transfer`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceFundingSourceId: fundingSourceId,
+            amount: amount,
+            userId: state.user?.email,
+            note: note
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Transfer failed");
+
+        state.balance -= amount;
+        save();
+        updateUI();
+
+        toast(`ACH Transfer of ${formatMoney(amount)} initiated successfully!`);
+        document.getElementById("sendAmount").value = "";
+        document.getElementById("sendNote").value = "";
+      } catch (err) {
+        console.error(err);
+        toast("Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Send Money via ACH";
+      }
     });
 
+    // ===== RECEIVE (Demo) =====
     document.getElementById("btnReceiveMoney").addEventListener("click", () => {
       const amount = parseFloat(document.getElementById("receiveAmount").value);
       if (!amount || amount <= 0) return toast("Enter a valid amount");
@@ -623,12 +658,11 @@
       renderBanks();
     }
 
-    // Theme
+    // ===== THEME + INIT =====
     document.getElementById("themeToggle").addEventListener("click", () => {
       applyTheme(state.theme === "dark" ? "light" : "dark");
     });
 
-    // Init
     load();
     applyTheme(state.theme);
     if (state.user) enterApp();
