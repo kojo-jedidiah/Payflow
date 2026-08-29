@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PayFlow – Professional Banking</title>
+  <title>PayFlow</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root, [data-theme="dark"] {
@@ -15,8 +15,7 @@
       --text-muted: #94a3b8;
       --border: #334155;
       --success: #10b981;
-      --danger: #ef4444;
-      --radius: 14px;
+      --sidebar: #0f172a;
     }
     [data-theme="light"] {
       --bg: #f1f5f9;
@@ -25,6 +24,7 @@
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
+      --sidebar: #ffffff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -32,50 +32,94 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.5;
+      display: flex;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+      padding-left: 8px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: white; font-size: 1.1rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 4px;
+      transition: 0.2s;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--primary);
+    }
+    .nav-item.active { font-weight: 600; }
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 240px;
+      flex: 1;
+      min-height: 100vh;
+      padding: 28px 32px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
     }
     .theme-toggle {
-      position: fixed; top: 16px; right: 16px; z-index: 200;
-      width: 42px; height: 42px; border-radius: 50%;
+      width: 40px; height: 40px; border-radius: 50%;
       border: 1px solid var(--border); background: var(--bg-card);
-      font-size: 1.2rem; cursor: pointer;
+      font-size: 1.1rem; cursor: pointer;
     }
-    .auth-wrapper {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: 24px; background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 70%);
+    .balance-card {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed 60%, #a855f7);
+      border-radius: 18px; padding: 28px; color: white; margin-bottom: 24px;
     }
-    [data-theme="light"] .auth-wrapper {
-      background: radial-gradient(ellipse at top, #e0e7ff 0%, #f8fafc 70%);
+    .balance-amount { font-size: 2.4rem; font-weight: 800; }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px; margin-bottom: 20px;
     }
-    .auth-card {
-      width: 100%; max-width: 520px; background: var(--bg-card);
-      border-radius: 20px; padding: 28px; border: 1px solid var(--border);
-      max-height: 92vh; overflow-y: auto;
-    }
-    .logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
-    .logo-icon {
-      width: 44px; height: 44px; background: linear-gradient(135deg, #6366f1, #a78bfa);
-      border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; color: white; font-size: 1.3rem;
-    }
-    .logo-text { font-size: 1.6rem; font-weight: 800; }
-    .tabs { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin: 18px 0; }
-    .tab { flex: 1; text-align: center; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--text-muted); }
-    .tab.active { background: var(--primary); color: white; }
-    .form-group { margin-bottom: 13px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
     input, select, textarea {
       width: 100%; padding: 11px 13px; border-radius: 10px;
       border: 1px solid var(--border); background: var(--bg-input); color: var(--text);
       font-size: 0.95rem; font-family: inherit;
     }
-    textarea { min-height: 70px; resize: vertical; }
-    .checkbox-group {
-      display: flex; gap: 10px; align-items: flex-start; margin-bottom: 11px;
-      font-size: 0.82rem; color: var(--text-muted);
-    }
-    .checkbox-group input { width: auto; margin-top: 3px; }
     .btn {
       width: 100%; padding: 13px; border: none; border-radius: 10px;
       font-weight: 600; font-size: 1rem; cursor: pointer;
@@ -85,30 +129,6 @@
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
     .btn-success { background: linear-gradient(135deg, #10b981, #059669); }
     .hidden { display: none !important; }
-    .navbar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 50;
-    }
-    .main { max-width: 960px; margin: 0 auto; padding: 24px 16px 60px; }
-    .balance-card {
-      background: linear-gradient(135deg, #4f46e5, #7c3aed 60%, #a855f7);
-      border-radius: 18px; padding: 28px; color: white; margin-bottom: 24px;
-    }
-    .balance-amount { font-size: 2.4rem; font-weight: 800; }
-    .nav-tabs {
-      display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;
-    }
-    .nav-tab {
-      padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;
-      background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted);
-      cursor: pointer; white-space: nowrap;
-    }
-    .nav-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-    .card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 22px; margin-bottom: 16px;
-    }
     .bank-item, .tx-item {
       display: flex; justify-content: space-between; align-items: center;
       padding: 14px; background: var(--bg); border-radius: 12px; margin-bottom: 10px;
@@ -131,20 +151,45 @@
       background: var(--bg); border-radius: 12px; padding: 16px; margin-top: 16px;
       border: 1px dashed var(--border); font-size: 0.9rem;
     }
-    @media (max-width: 600px) {
-      .form-row { grid-template-columns: 1fr; }
+
+    /* AUTH */
+    .auth-wrapper {
+      min-height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center;
+      padding: 24px; background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 70%);
+    }
+    [data-theme="light"] .auth-wrapper {
+      background: radial-gradient(ellipse at top, #e0e7ff 0%, #f8fafc 70%);
+    }
+    .auth-card {
+      width: 100%; max-width: 480px; background: var(--bg-card);
+      border-radius: 20px; padding: 32px; border: 1px solid var(--border);
+      max-height: 92vh; overflow-y: auto;
+    }
+    .tabs { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin: 18px 0; }
+    .tab { flex: 1; text-align: center; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--text-muted); }
+    .tab.active { background: var(--primary); color: white; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .checkbox-group {
+      display: flex; gap: 10px; align-items: flex-start; margin-bottom: 11px;
+      font-size: 0.82rem; color: var(--text-muted);
+    }
+    .checkbox-group input { width: auto; margin-top: 3px; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 70px; padding: 16px 8px; }
+      .sidebar .nav-text, .sidebar-logo span { display: none; }
+      .main-content { margin-left: 70px; padding: 20px 16px; }
     }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" id="themeToggle">☀️</button>
 
-  <!-- AUTH -->
+  <!-- ==================== AUTH SCREEN ==================== -->
   <div id="authScreen" class="auth-wrapper">
     <div class="auth-card">
-      <div class="logo">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;">
         <div class="logo-icon">P</div>
-        <div class="logo-text">PayFlow</div>
+        <div style="font-size:1.5rem;font-weight:800;">PayFlow</div>
       </div>
       <p style="text-align:center;color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;">Professional money transfers</p>
 
@@ -176,137 +221,157 @@
             <input type="text" id="signupLastName" placeholder="Doe">
           </div>
         </div>
-
         <div class="form-group">
           <label>Date of Birth *</label>
           <input type="date" id="signupDOB">
         </div>
-
         <div class="form-group">
           <label>Email *</label>
           <input type="email" id="signupEmail" placeholder="john@example.com">
         </div>
-
         <div class="form-group">
           <label>Phone *</label>
           <input type="tel" id="signupPhone" placeholder="+1 555 123 4567">
         </div>
-
         <div class="form-group">
-          <label>Social Security Number (SSN) *</label>
+          <label>SSN *</label>
           <input type="password" id="signupSSN" placeholder="XXX-XX-XXXX" maxlength="11">
         </div>
-
         <div class="form-group">
           <label>Home Address *</label>
           <textarea id="signupAddress" placeholder="Street, City, State, ZIP"></textarea>
         </div>
-
         <div class="form-group">
           <label>Password *</label>
           <input type="password" id="signupPassword" placeholder="Minimum 8 characters">
         </div>
-
         <div class="checkbox-group">
           <input type="checkbox" id="consentCheck">
-          <label for="consentCheck" style="margin:0;">I consent to PayFlow collecting my personal and banking information for verification and transfers.</label>
+          <label for="consentCheck" style="margin:0;">I consent to PayFlow collecting my information for verification and transfers.</label>
         </div>
         <div class="checkbox-group">
           <input type="checkbox" id="agreementCheck">
-          <label for="agreementCheck" style="margin:0;">I agree to the Terms of Service and Privacy Policy. All information provided is accurate.</label>
+          <label for="agreementCheck" style="margin:0;">I agree to the Terms of Service and Privacy Policy.</label>
         </div>
-
         <button class="btn" id="btnSignup">Create Account</button>
       </div>
     </div>
   </div>
 
-  <!-- MAIN APP -->
-  <div id="mainApp" class="hidden">
-    <nav class="navbar">
-      <div style="display:flex;align-items:center;gap:10px;font-weight:700;">
-        <div class="logo-icon" style="width:34px;height:34px;font-size:1rem;">P</div>
-        PayFlow
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span id="userGreeting" style="font-size:0.9rem;color:var(--text-muted);">Hi</span>
-        <button class="btn btn-outline" style="width:auto;padding:8px 14px;font-size:0.85rem;" id="btnLogout">Logout</button>
-      </div>
-    </nav>
-
-    <div class="main">
-      <div class="balance-card">
-        <div style="opacity:0.9;font-size:0.9rem;margin-bottom:4px;">Available Balance</div>
-        <div class="balance-amount" id="balanceDisplay">$0.00</div>
+  <!-- ==================== APP LAYOUT ==================== -->
+  <div id="mainApp" class="hidden" style="display:flex;width:100%;">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">P</div>
+        <span style="font-weight:700;font-size:1.2rem;">PayFlow</span>
       </div>
 
-      <div class="nav-tabs">
-        <div class="nav-tab active" data-page="send">Send Money</div>
-        <div class="nav-tab" data-page="receive">Receive Money</div>
-        <div class="nav-tab" data-page="accounts">My Accounts</div>
-        <div class="nav-tab" data-page="history">History</div>
+      <div class="nav-item active" data-page="dashboard">
+        <span>📊</span> <span class="nav-text">Dashboard</span>
+      </div>
+      <div class="nav-item" data-page="send">
+        <span>↑</span> <span class="nav-text">Send</span>
+      </div>
+      <div class="nav-item" data-page="receive">
+        <span>↓</span> <span class="nav-text">Receive</span>
+      </div>
+      <div class="nav-item" data-page="accounts">
+        <span>🏦</span> <span class="nav-text">Accounts</span>
+      </div>
+      <div class="nav-item" data-page="terms">
+        <span>📄</span> <span class="nav-text">Terms</span>
+      </div>
+      <div class="nav-item" data-page="privacy">
+        <span>🔒</span> <span class="nav-text">Privacy</span>
       </div>
 
-      <!-- SEND MONEY -->
-      <div id="pageSend" class="card">
-        <h2 style="margin-bottom:16px;font-size:1.2rem;">Send Money (ACH)</h2>
+      <div class="sidebar-footer">
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px;" id="userGreeting">Hi</div>
+        <button class="btn btn-outline" style="padding:9px;" id="btnLogout">Logout</button>
+      </div>
+    </aside>
 
-        <div class="form-group">
-          <label>Send From</label>
-          <select id="sendFrom" disabled>
-            <option value="balance">PayFlow Balance</option>
-          </select>
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <div class="topbar">
+        <h1 id="pageTitle" style="font-size:1.5rem;font-weight:700;">Dashboard</h1>
+        <button class="theme-toggle" id="themeToggle">☀️</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="pageDashboard">
+        <div class="balance-card">
+          <div style="opacity:0.9;font-size:0.9rem;margin-bottom:4px;">Available Balance</div>
+          <div class="balance-amount" id="balanceDisplay">$0.00</div>
         </div>
 
-        <div class="form-group">
-          <label>Send To (Bank Account)</label>
-          <select id="sendToBank">
-            <option value="">Select a verified bank</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Amount (USD)</label>
-          <input type="number" id="sendAmount" placeholder="0.00" step="0.01" min="1">
-        </div>
-
-        <div class="form-group">
-          <label>Note (optional)</label>
-          <input type="text" id="sendNote" placeholder="Payment for services">
-        </div>
-
-        <button class="btn" id="btnSendMoney">Send Money via ACH</button>
-
-        <div id="sendReceipt" class="receipt hidden"></div>
-      </div>
-
-      <!-- RECEIVE MONEY -->
-      <div id="pageReceive" class="card hidden">
-        <h2 style="margin-bottom:16px;font-size:1.2rem;">Receive Money (ACH)</h2>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
-          Pull money from your linked bank into your PayFlow balance.
-        </p>
-        <div class="form-group">
-          <label>Amount (USD)</label>
-          <input type="number" id="receiveAmount" placeholder="0.00" step="0.01" value="100">
-        </div>
-        <button class="btn btn-success" id="btnReceiveMoney">Receive Funds via ACH</button>
-        <div id="receiveReceipt" class="receipt hidden"></div>
-      </div>
-
-      <!-- MY ACCOUNTS -->
-      <div id="pageAccounts" class="hidden">
         <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <h2 style="font-size:1.2rem;">Linked Bank Accounts</h2>
-            <button class="btn" style="width:auto;padding:9px 16px;font-size:0.9rem;" id="btnShowLinkForm">+ Link New Bank</button>
+          <h3 style="margin-bottom:14px;">Transaction History</h3>
+          <div id="txHistoryList">
+            <p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h3>Linked Bank Accounts</h3>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:0.85rem;" id="btnShowLinkForm">+ Link Bank</button>
           </div>
           <div id="linkedBanksList">
             <p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p>
           </div>
         </div>
+      </div>
 
-        <div class="card" id="linkBankForm" style="display:none;">
+      <!-- SEND -->
+      <div id="pageSend" class="hidden">
+        <div class="card">
+          <h2 style="margin-bottom:16px;font-size:1.2rem;">Send Money</h2>
+          <div class="form-group">
+            <label>Send From</label>
+            <select id="sendFrom" disabled>
+              <option value="balance">PayFlow Balance</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Send To (Bank Account)</label>
+            <select id="sendToBank">
+              <option value="">Select a verified bank</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount (USD)</label>
+            <input type="number" id="sendAmount" placeholder="0.00" step="0.01" min="1">
+          </div>
+          <div class="form-group">
+            <label>Note (optional)</label>
+            <input type="text" id="sendNote" placeholder="Payment for services">
+          </div>
+          <button class="btn" id="btnSendMoney">Send Money via ACH</button>
+          <div id="sendReceipt" class="receipt hidden"></div>
+        </div>
+      </div>
+
+      <!-- RECEIVE -->
+      <div id="pageReceive" class="hidden">
+        <div class="card">
+          <h2 style="margin-bottom:16px;font-size:1.2rem;">Receive Money</h2>
+          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">
+            Pull money from your linked bank into your PayFlow balance.
+          </p>
+          <div class="form-group">
+            <label>Amount (USD)</label>
+            <input type="number" id="receiveAmount" placeholder="0.00" step="0.01" value="100">
+          </div>
+          <button class="btn btn-success" id="btnReceiveMoney">Receive Funds via ACH</button>
+          <div id="receiveReceipt" class="receipt hidden"></div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTS (Link + Verify) -->
+      <div id="pageAccounts" class="hidden">
+        <div class="card" id="linkBankForm">
           <h3 style="margin-bottom:16px;">Link Bank Account</h3>
           <div class="form-group">
             <label>Account Holder Name</label>
@@ -328,7 +393,6 @@
             </select>
           </div>
           <button class="btn" id="btnAddBank">Add Bank & Start Micro-Deposits</button>
-          <button class="btn btn-outline" style="margin-top:10px;" id="btnCancelLink">Cancel</button>
         </div>
 
         <div class="card" id="verifyMicroForm" style="display:none;">
@@ -351,11 +415,29 @@
         </div>
       </div>
 
-      <!-- TRANSACTION HISTORY -->
-      <div id="pageHistory" class="card hidden">
-        <h2 style="margin-bottom:16px;font-size:1.2rem;">Transaction History</h2>
-        <div id="txHistoryList">
-          <p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>
+      <!-- TERMS -->
+      <div id="pageTerms" class="hidden">
+        <div class="card">
+          <h2 style="margin-bottom:16px;">Terms of Service</h2>
+          <p style="color:var(--text-muted);margin-bottom:12px;">Last updated: August 29, 2026</p>
+          <p style="margin-bottom:12px;">Welcome to PayFlow. By using our services you agree to these Terms.</p>
+          <p style="margin-bottom:12px;"><strong>1. Service</strong><br>PayFlow allows users to link bank accounts and initiate ACH transfers.</p>
+          <p style="margin-bottom:12px;"><strong>2. Bank Linking</strong><br>By linking a bank account you authorize PayFlow and Dwolla to verify ownership and process ACH transfers.</p>
+          <p style="margin-bottom:12px;"><strong>3. Dwolla</strong><br>You also agree to Dwolla’s Terms of Service: <a href="https://www.dwolla.com/legal/tos/" target="_blank" style="color:#818cf8;">https://www.dwolla.com/legal/tos/</a></p>
+          <p style="margin-bottom:12px;"><strong>4. Prohibited Use</strong><br>You may not use the Service for illegal activities or fraud.</p>
+          <p>Full Terms are also available at <a href="/terms.html" style="color:#818cf8;">/terms.html</a></p>
+        </div>
+      </div>
+
+      <!-- PRIVACY -->
+      <div id="pagePrivacy" class="hidden">
+        <div class="card">
+          <h2 style="margin-bottom:16px;">Privacy Policy</h2>
+          <p style="color:var(--text-muted);margin-bottom:12px;">Last updated: August 29, 2026</p>
+          <p style="margin-bottom:12px;">We collect account information, identity information (including SSN and date of birth), bank account details, and transaction data to provide the Service.</p>
+          <p style="margin-bottom:12px;">We use Dwolla to process bank verification and ACH transfers. Their privacy policy is available at <a href="https://www.dwolla.com/legal/privacy/" target="_blank" style="color:#818cf8;">https://www.dwolla.com/legal/privacy/</a>.</p>
+          <p style="margin-bottom:12px;">We do not sell your personal information.</p>
+          <p>Full Privacy Policy is available at <a href="/privacy.html" style="color:#818cf8;">/privacy.html</a></p>
         </div>
       </div>
     </div>
@@ -381,7 +463,6 @@
       t.classList.add("show");
       setTimeout(() => t.classList.remove("show"), 3800);
     }
-
     function save() {
       localStorage.setItem("payflow_user", JSON.stringify(state.user));
       localStorage.setItem("payflow_balance", state.balance);
@@ -389,7 +470,6 @@
       localStorage.setItem("payflow_dwolla_customer", state.dwollaCustomerId || "");
       localStorage.setItem("payflow_theme", state.theme);
     }
-
     function load() {
       const u = localStorage.getItem("payflow_user");
       if (u) state.user = JSON.parse(u);
@@ -397,25 +477,20 @@
       state.transactions = JSON.parse(localStorage.getItem("payflow_transactions") || "[]");
       state.dwollaCustomerId = localStorage.getItem("payflow_dwolla_customer") || null;
     }
-
     function applyTheme(theme) {
       document.documentElement.setAttribute("data-theme", theme);
       document.getElementById("themeToggle").textContent = theme === "dark" ? "☀️" : "🌙";
       state.theme = theme;
       localStorage.setItem("payflow_theme", theme);
     }
+    function formatMoney(n) { return "$" + Number(n).toFixed(2); }
 
-    function formatMoney(n) {
-      return "$" + Number(n).toFixed(2);
-    }
-
-    function addTransaction(type, amount, note, status = "completed") {
+    function addTransaction(type, amount, note) {
       const tx = {
         id: Date.now(),
-        type,           // 'in' or 'out'
+        type,
         amount,
         note: note || (type === 'in' ? 'Received via ACH' : 'Sent via ACH'),
-        status,
         date: new Date().toLocaleString()
       };
       state.transactions.unshift(tx);
@@ -435,7 +510,7 @@
       });
     });
 
-    // Signup with SSN, DOB, Address
+    // Signup
     document.getElementById("btnSignup").addEventListener("click", async () => {
       const firstName = document.getElementById("signupFirstName").value.trim();
       const lastName = document.getElementById("signupLastName").value.trim();
@@ -462,12 +537,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to create customer");
 
-        state.user = {
-          firstName, lastName,
-          fullName: firstName + " " + lastName,
-          dob, email, phone, address
-          // Note: Never store real SSN in localStorage in production
-        };
+        state.user = { firstName, lastName, fullName: firstName + " " + lastName, dob, email, phone, address };
         state.dwollaCustomerId = data.customerId;
         state.balance = 0;
         state.transactions = [];
@@ -480,12 +550,10 @@
       }
     });
 
-    // Login
     document.getElementById("btnLogin").addEventListener("click", () => {
       const email = document.getElementById("loginEmail").value.trim().toLowerCase();
       const pass = document.getElementById("loginPassword").value;
       if (!email || !pass) return toast("Enter email and password");
-
       state.user = state.user || { fullName: email.split("@")[0], email };
       save();
       enterApp();
@@ -495,6 +563,7 @@
     function enterApp() {
       document.getElementById("authScreen").classList.add("hidden");
       document.getElementById("mainApp").classList.remove("hidden");
+      document.getElementById("mainApp").style.display = "flex";
       document.getElementById("userGreeting").textContent = "Hi, " + (state.user?.firstName || state.user?.fullName || "User");
       updateUI();
       loadBanks();
@@ -505,33 +574,46 @@
       state.user = null;
       save();
       document.getElementById("mainApp").classList.add("hidden");
+      document.getElementById("mainApp").style.display = "none";
       document.getElementById("authScreen").classList.remove("hidden");
     });
 
-    // Page navigation
-    document.querySelectorAll(".nav-tab").forEach(tab => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
+    // Sidebar navigation
+    document.querySelectorAll(".nav-item").forEach(item => {
+      item.addEventListener("click", () => {
+        document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+        item.classList.add("active");
 
-        ["pageSend", "pageReceive", "pageAccounts", "pageHistory"].forEach(id => {
+        const page = item.dataset.page;
+        ["pageDashboard", "pageSend", "pageReceive", "pageAccounts", "pageTerms", "pagePrivacy"].forEach(id => {
           document.getElementById(id).classList.add("hidden");
         });
-
-        const page = tab.dataset.page;
         document.getElementById("page" + page.charAt(0).toUpperCase() + page.slice(1)).classList.remove("hidden");
+
+        const titles = {
+          dashboard: "Dashboard",
+          send: "Send Money",
+          receive: "Receive Money",
+          accounts: "Link Bank Account",
+          terms: "Terms of Service",
+          privacy: "Privacy Policy"
+        };
+        document.getElementById("pageTitle").textContent = titles[page] || "PayFlow";
       });
     });
 
-    // Link Bank
+    // Link Bank from Dashboard button
     document.getElementById("btnShowLinkForm").addEventListener("click", () => {
-      document.getElementById("linkBankForm").style.display = "block";
-      document.getElementById("verifyMicroForm").style.display = "none";
-    });
-    document.getElementById("btnCancelLink").addEventListener("click", () => {
-      document.getElementById("linkBankForm").style.display = "none";
+      document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+      document.querySelector('[data-page="accounts"]').classList.add("active");
+      ["pageDashboard", "pageSend", "pageReceive", "pageAccounts", "pageTerms", "pagePrivacy"].forEach(id => {
+        document.getElementById(id).classList.add("hidden");
+      });
+      document.getElementById("pageAccounts").classList.remove("hidden");
+      document.getElementById("pageTitle").textContent = "Link Bank Account";
     });
 
+    // Add Bank
     document.getElementById("btnAddBank").addEventListener("click", async () => {
       const btn = document.getElementById("btnAddBank");
       btn.disabled = true;
@@ -614,6 +696,7 @@
 
         toast("Bank verified successfully!");
         document.getElementById("verifyMicroForm").style.display = "none";
+        document.getElementById("linkBankForm").style.display = "block";
         loadBanks();
       } catch (err) {
         console.error(err);
@@ -668,7 +751,6 @@
         list.innerHTML = `<p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>`;
         return;
       }
-
       list.innerHTML = state.transactions.map(tx => `
         <div class="tx-item">
           <div>
@@ -682,7 +764,7 @@
       `).join("");
     }
 
-    // SEND MONEY
+    // Send Money
     document.getElementById("btnSendMoney").addEventListener("click", async () => {
       const btn = document.getElementById("btnSendMoney");
       const amount = parseFloat(document.getElementById("sendAmount").value);
@@ -702,9 +784,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sourceFundingSourceId: fundingSourceId,
-            amount,
-            userId: state.user?.email,
-            note
+            amount, userId: state.user?.email, note
           })
         });
         const data = await res.json();
@@ -715,18 +795,17 @@
         save();
         updateUI();
 
-        // Show receipt
         const receipt = document.getElementById("sendReceipt");
         receipt.classList.remove("hidden");
         receipt.innerHTML = `
           <strong>Transfer Receipt</strong><br>
           Amount: ${formatMoney(amount)}<br>
+          From: PayFlow Balance<br>
           To: Linked Bank<br>
           Status: Initiated<br>
           Ref: ${data.transferId || tx.id}<br>
           Date: ${tx.date}
         `;
-
         toast(`Successfully sent ${formatMoney(amount)}`);
         document.getElementById("sendAmount").value = "";
         document.getElementById("sendNote").value = "";
@@ -739,7 +818,7 @@
       }
     });
 
-    // RECEIVE MONEY
+    // Receive Money
     document.getElementById("btnReceiveMoney").addEventListener("click", async () => {
       const btn = document.getElementById("btnReceiveMoney");
       const amount = parseFloat(document.getElementById("receiveAmount").value);
@@ -777,11 +856,11 @@
           <strong>Receive Receipt</strong><br>
           Amount: ${formatMoney(amount)}<br>
           From: Linked Bank<br>
+          To: PayFlow Balance<br>
           Status: Initiated<br>
           Ref: ${data.transferId || tx.id}<br>
           Date: ${tx.date}
         `;
-
         toast(`Successfully received ${formatMoney(amount)}`);
         document.getElementById("receiveAmount").value = "100";
       } catch (err) {
