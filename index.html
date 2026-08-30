@@ -309,7 +309,6 @@
           <button class="btn" id="btnVerifyMicro">Verify Bank Account</button>
         </div>
 
-        <!-- My Linked Accounts -->
         <div class="card" style="margin-top:8px;">
           <h3 style="margin-bottom:14px;">My Linked Accounts</h3>
           <div id="accountsPageBankList">
@@ -378,7 +377,7 @@
       const t = document.getElementById("toast");
       t.textContent = msg;
       t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 3800);
+      setTimeout(() => t.classList.remove("show"), 4000);
     }
     function save() {
       localStorage.setItem("payflow_user", JSON.stringify(state.user));
@@ -451,8 +450,12 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ firstName, lastName, email })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to create customer");
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || `Server error ${res.status}`);
+        }
 
         state.user = { firstName, lastName, fullName: firstName + " " + lastName, dob, email, phone, address };
         state.dwollaCustomerId = data.customerId;
@@ -460,10 +463,10 @@
         state.transactions = [];
         save();
         enterApp();
-        toast("Account created successfully!");
+        toast(data.message || "Account created successfully!");
       } catch (err) {
-        console.error(err);
-        toast("Error: " + err.message);
+        console.error("Signup error:", err);
+        toast("Error: " + (err.message || "Load failed. Please try again."));
       }
     });
 
@@ -525,15 +528,21 @@
       const btn = document.getElementById("btnAddBank");
       btn.disabled = true; btn.textContent = "Processing...";
       try {
-        if (!state.dwollaCustomerId) {
+        if (!state.dwollaCustomerId || String(state.dwollaCustomerId).startsWith('pending-')) {
           const res = await fetch(`${BACKEND_URL}/api/create-customer`, {
             method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ firstName: state.user?.firstName || "User", lastName: state.user?.lastName || "Account", email: state.user?.email })
+            body: JSON.stringify({
+              firstName: state.user?.firstName || "User",
+              lastName: state.user?.lastName || "Account",
+              email: state.user?.email
+            })
           });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          state.dwollaCustomerId = data.customerId; save();
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || "Failed to create customer");
+          state.dwollaCustomerId = data.customerId;
+          save();
         }
+
         const routingNumber = document.getElementById("routingNumber").value.trim();
         const accountNumber = document.getElementById("accountNumber").value.trim();
         const bankAccountType = document.getElementById("accountType").value;
@@ -542,10 +551,14 @@
 
         const addRes = await fetch(`${BACKEND_URL}/api/add-funding-source`, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ customerId: state.dwollaCustomerId, routingNumber, accountNumber, bankAccountType, name, userId: state.user?.email })
+          body: JSON.stringify({
+            customerId: state.dwollaCustomerId,
+            routingNumber, accountNumber, bankAccountType, name,
+            userId: state.user?.email
+          })
         });
-        const addData = await addRes.json();
-        if (!addRes.ok) throw new Error(addData.error || "Failed to add bank");
+        const addData = await addRes.json().catch(() => ({}));
+        if (!addRes.ok) throw new Error(addData.error || `Server error ${addRes.status}`);
 
         await fetch(`${BACKEND_URL}/api/initiate-micro-deposits`, {
           method: "POST", headers: { "Content-Type": "application/json" },
@@ -558,7 +571,8 @@
         toast("Micro-deposits initiated!");
         loadBanks();
       } catch (err) {
-        console.error(err); toast("Error: " + err.message);
+        console.error(err);
+        toast("Error: " + (err.message || "Load failed"));
       } finally {
         btn.disabled = false; btn.textContent = "Add Bank & Start Micro-Deposits";
       }
@@ -578,7 +592,7 @@
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fundingSourceId, amount1, amount2 })
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || "Verification failed");
 
         toast("Bank verified successfully!");
@@ -586,7 +600,8 @@
         document.getElementById("linkBankForm").style.display = "block";
         loadBanks();
       } catch (err) {
-        console.error(err); toast("Error: " + err.message);
+        console.error(err);
+        toast("Error: " + (err.message || "Load failed"));
       } finally {
         btn.disabled = false; btn.textContent = "Verify Bank Account";
       }
@@ -669,7 +684,7 @@
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sourceFundingSourceId: fundingSourceId, amount, userId: state.user?.email, note })
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || "Transfer failed");
 
         state.balance -= amount;
@@ -683,7 +698,8 @@
         document.getElementById("sendAmount").value = "";
         document.getElementById("sendNote").value = "";
       } catch (err) {
-        console.error(err); toast("Error: " + err.message);
+        console.error(err);
+        toast("Error: " + (err.message || "Load failed"));
       } finally {
         btn.disabled = false; btn.textContent = "Send Money via ACH";
       }
@@ -701,9 +717,14 @@
       try {
         const res = await fetch(`${BACKEND_URL}/api/receive-money`, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fundingSourceId: verifiedBank.stripe_payment_method_id, amount, userId: state.user?.email, note: "Received via ACH" })
+          body: JSON.stringify({
+            fundingSourceId: verifiedBank.stripe_payment_method_id,
+            amount,
+            userId: state.user?.email,
+            note: "Received via ACH"
+          })
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || "Failed to receive");
 
         state.balance += amount;
@@ -716,7 +737,8 @@
         toast(`Successfully received ${formatMoney(amount)}`);
         document.getElementById("receiveAmount").value = "100";
       } catch (err) {
-        console.error(err); toast("Error: " + err.message);
+        console.error(err);
+        toast("Error: " + (err.message || "Load failed"));
       } finally {
         btn.disabled = false; btn.textContent = "Receive Funds via ACH";
       }
