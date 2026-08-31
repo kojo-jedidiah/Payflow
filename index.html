@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="dark"] {
+      --primary: #6366f1;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --success: #10b981;
+    }
+    [data-theme="light"] {
+      --bg: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-input: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 260px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      height: 100vh;
+      position: fixed;
+      left: 0; top: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      z-index: 200;
+      transition: transform 0.3s ease;
+    }
+    .sidebar.closed { transform: translateX(-100%); }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding: 0 8px;
+    }
+    .logo-area { display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: white; font-size: 1.1rem;
+    }
+    .close-sidebar {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.4rem; cursor: pointer; padding: 4px 8px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 14px; border-radius: 10px;
+      color: var(--text-muted); font-weight: 500; font-size: 0.95rem;
+      cursor: pointer; margin-bottom: 4px; transition: 0.2s;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(99, 102, 241, 0.15); color: var(--primary);
+    }
+    .nav-item.active { font-weight: 600; }
+    .sidebar-footer {
+      margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border);
+    }
+    .main-content {
+      margin-left: 260px; min-height: 100vh; padding: 24px 28px;
+      transition: margin-left 0.3s ease;
+    }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;
+    }
+    .menu-btn {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+      width: 42px; height: 42px; border-radius: 10px; font-size: 1.3rem;
+      cursor: pointer; display: none; align-items: center; justify-content: center;
+    }
+    .theme-toggle {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--bg-card);
+      font-size: 1.1rem; cursor: pointer;
+    }
+    .balance-card {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed 60%, #a855f7);
+      border-radius: 18px; padding: 28px; color: white; margin-bottom: 24px;
+    }
+    .balance-amount { font-size: 2.4rem; font-weight: 800; }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px; margin-bottom: 20px;
+    }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
+    input, select, textarea {
+      width: 100%; padding: 11px 13px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-input); color: var(--text);
+      font-size: 0.95rem; font-family: inherit;
+    }
+    .btn {
+      width: 100%; padding: 13px; border: none; border-radius: 10px;
+      font-weight: 600; font-size: 1rem; cursor: pointer;
+      background: linear-gradient(135deg, #6366f1, #7c3aed); color: white;
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-success { background: linear-gradient(135deg, #10b981, #059669); }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .hidden { display: none !important; }
+    .bank-item, .tx-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px; background: var(--bg); border-radius: 12px; margin-bottom: 10px;
+    }
+    .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+    .badge-verified { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+    .badge-pending { background: rgba(234,179,8,0.2); color: #fde047; }
+    .tx-in { color: #34d399; font-weight: 600; }
+    .tx-out { color: #f87171; font-weight: 600; }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--bg-card); border: 1px solid var(--border);
+      padding: 12px 20px; border-radius: 10px; transition: 0.3s; z-index: 300;
+      font-weight: 500; max-width: 90%; text-align: center;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .receipt {
+      background: var(--bg); border-radius: 12px; padding: 16px; margin-top: 16px;
+      border: 1px dashed var(--border); font-size: 0.9rem;
+    }
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 150; display: none;
+    }
+    .overlay.show { display: block; }
+    .auth-wrapper {
+      min-height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center;
+      padding: 24px; background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 70%);
+    }
+    [data-theme="light"] .auth-wrapper {
+      background: radial-gradient(ellipse at top, #e0e7ff 0%, #f8fafc 70%);
+    }
+    .auth-card {
+      width: 100%; max-width: 480px; background: var(--bg-card);
+      border-radius: 20px; padding: 32px; border: 1px solid var(--border);
+      max-height: 92vh; overflow-y: auto;
+    }
+    .tabs { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin: 18px 0; }
+    .tab { flex: 1; text-align: center; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; color: var(--text-muted); }
+    .tab.active { background: var(--primary); color: white; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .checkbox-group {
+      display: flex; gap: 10px; align-items: flex-start; margin-bottom: 11px;
+      font-size: 0.82rem; color: var(--text-muted);
+    }
+    .checkbox-group input { width: auto; margin-top: 3px; }
+
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      .menu-btn { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- AUTH -->
+  <div id="authScreen" class="auth-wrapper">
+    <div class="auth-card">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;">
+        <div class="logo-icon">P</div>
+        <div style="font-size:1.5rem;font-weight:800;">PayFlow</div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);font-size:0.9rem;margin-bottom:8px;">Professional money transfers</p>
+      <div class="tabs">
+        <div class="tab active" data-tab="login">Log in</div>
+        <div class="tab" data-tab="signup">Sign up</div>
+      </div>
+      <div id="loginForm">
+        <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+        <button class="btn" id="btnLogin">Log in</button>
+      </div>
+      <div id="signupForm" class="hidden">
+        <div class="form-row">
+          <div class="form-group"><label>First Name *</label><input type="text" id="signupFirstName" placeholder="John"></div>
+          <div class="form-group"><label>Last Name *</label><input type="text" id="signupLastName" placeholder="Doe"></div>
+        </div>
+        <div class="form-group"><label>Date of Birth *</label><input type="date" id="signupDOB"></div>
+        <div class="form-group"><label>Email *</label><input type="email" id="signupEmail" placeholder="john@example.com"></div>
+        <div class="form-group"><label>Phone *</label><input type="tel" id="signupPhone" placeholder="+1 555 123 4567"></div>
+        <div class="form-group"><label>SSN *</label><input type="password" id="signupSSN" placeholder="XXX-XX-XXXX" maxlength="11"></div>
+        <div class="form-group"><label>Home Address *</label><textarea id="signupAddress" placeholder="Street, City, State, ZIP"></textarea></div>
+        <div class="form-group"><label>Password *</label><input type="password" id="signupPassword" placeholder="Minimum 8 characters"></div>
+        <div class="checkbox-group"><input type="checkbox" id="consentCheck"><label for="consentCheck" style="margin:0;">I consent to PayFlow collecting my information for verification and transfers.</label></div>
+        <div class="checkbox-group"><input type="checkbox" id="agreementCheck"><label for="agreementCheck" style="margin:0;">I agree to the Terms of Service and Privacy Policy.</label></div>
+        <button class="btn" id="btnSignup">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="mainApp" class="hidden">
+    <div class="overlay" id="overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <div class="logo-icon">P</div>
+          <span style="font-weight:700;font-size:1.15rem;">PayFlow</span>
+        </div>
+        <button class="close-sidebar" id="closeSidebar">✕</button>
+      </div>
+      <div class="nav-item active" data-page="dashboard">Dashboard</div>
+      <div class="nav-item" data-page="send">Send Money</div>
+      <div class="nav-item" data-page="receive">Receive Money</div>
+      <div class="nav-item" data-page="accounts">Link Bank Account</div>
+      <div class="nav-item" data-page="terms">Terms of Service</div>
+      <div class="nav-item" data-page="privacy">Privacy Policy</div>
+      <div class="sidebar-footer">
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;" id="userGreeting">Hi</div>
+        <button class="btn btn-danger" style="padding:11px;" id="btnLogout">Logout</button>
+      </div>
+    </aside>
+
+    <div class="main-content" id="mainContent">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="menu-btn" id="openSidebar">☰</button>
+          <h1 id="pageTitle" style="font-size:1.4rem;font-weight:700;">Dashboard</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="theme-toggle" id="themeToggle">☀️</button>
+          <button class="btn btn-danger" id="btnLogoutTop" style="width:auto;padding:8px 14px;font-size:0.85rem;">Logout</button>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="pageDashboard">
+        <div class="balance-card">
+          <div style="opacity:0.9;font-size:0.9rem;margin-bottom:4px;">Available Balance</div>
+          <div class="balance-amount" id="balanceDisplay">$0.00</div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:14px;">Transaction History</h3>
+          <div id="txHistoryList"><p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h3>Linked Bank Accounts</h3>
+            <button class="btn" style="width:auto;padding:8px 14px;font-size:0.85rem;" id="btnShowLinkForm">+ Link Bank</button>
+          </div>
+          <div id="linkedBanksList"><p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p></div>
+        </div>
+      </div>
+
+      <!-- SEND -->
+      <div id="pageSend" class="hidden">
+        <div class="card">
+          <h2 style="margin-bottom:16px;font-size:1.2rem;">Send Money</h2>
+          <div class="form-group"><label>Send From</label><select id="sendFrom" disabled><option value="balance">PayFlow Balance</option></select></div>
+          <div class="form-group"><label>Send To (Bank Account)</label><select id="sendToBank"><option value="">Select a verified bank</option></select></div>
+          <div class="form-group"><label>Amount (USD)</label><input type="number" id="sendAmount" placeholder="0.00" step="0.01" min="1"></div>
+          <div class="form-group"><label>Note (optional)</label><input type="text" id="sendNote" placeholder="Payment for services"></div>
+          <button class="btn" id="btnSendMoney">Send Money via ACH</button>
+          <div id="sendReceipt" class="receipt hidden"></div>
+        </div>
+      </div>
+
+      <!-- RECEIVE -->
+      <div id="pageReceive" class="hidden">
+        <div class="card">
+          <h2 style="margin-bottom:16px;font-size:1.2rem;">Receive Money</h2>
+          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Pull money from your linked bank into your PayFlow balance.</p>
+          <div class="form-group"><label>Amount (USD)</label><input type="number" id="receiveAmount" placeholder="0.00" step="0.01" value="100"></div>
+          <button class="btn btn-success" id="btnReceiveMoney">Receive Funds via ACH</button>
+          <div id="receiveReceipt" class="receipt hidden"></div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTS -->
+      <div id="pageAccounts" class="hidden">
+        <div class="card" id="linkBankForm">
+          <h3 style="margin-bottom:16px;">Link Bank Account</h3>
+          <div class="form-group"><label>Account Holder Name</label><input type="text" id="bankName" placeholder="John Doe"></div>
+          <div class="form-group"><label>Routing Number</label><input type="text" id="routingNumber" placeholder="122105278" maxlength="9"></div>
+          <div class="form-group"><label>Account Number</label><input type="text" id="accountNumber" placeholder="Account number"></div>
+          <div class="form-group"><label>Account Type</label><select id="accountType"><option value="checking">Checking</option><option value="savings">Savings</option></select></div>
+          <button class="btn" id="btnAddBank">Add Bank & Start Micro-Deposits</button>
+        </div>
+
+        <div class="card" id="verifyMicroForm" style="display:none;">
+          <h3 style="margin-bottom:12px;">Verify Micro-Deposits</h3>
+          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px;">Enter the two small amounts that appeared in your bank account.</p>
+          <div class="form-row">
+            <div class="form-group"><label>Amount 1</label><input type="number" id="amount1" placeholder="0.00" step="0.01"></div>
+            <div class="form-group"><label>Amount 2</label><input type="number" id="amount2" placeholder="0.00" step="0.01"></div>
+          </div>
+          <input type="hidden" id="currentFundingSourceId">
+          <button class="btn" id="btnVerifyMicro">Verify Bank Account</button>
+        </div>
+
+        <div class="card" style="margin-top:8px;">
+          <h3 style="margin-bottom:14px;">My Linked Accounts</h3>
+          <div id="accountsPageBankList">
+            <p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TERMS -->
+      <div id="pageTerms" class="hidden">
+        <div class="card">
+          <h2 style="margin-bottom:16px;">Terms of Service</h2>
+          <p style="color:var(--text-muted);margin-bottom:12px;">Last updated: August 29, 2026</p>
+          <p style="margin-bottom:12px;">Welcome to PayFlow. By using our services you agree to these Terms.</p>
+          <p style="margin-bottom:12px;"><strong>1. Service</strong><br>PayFlow allows users to link bank accounts and initiate ACH transfers.</p>
+          <p style="margin-bottom:12px;"><strong>2. Bank Linking</strong><br>By linking a bank account you authorize PayFlow and Dwolla to verify ownership and process ACH transfers.</p>
+          <p style="margin-bottom:12px;"><strong>3. Dwolla</strong><br>You also agree to Dwolla’s Terms of Service.</p>
+          <p>Full Terms are also available at <a href="/terms.html" style="color:#818cf8;">/terms.html</a></p>
+        </div>
+      </div>
+
+      <!-- PRIVACY -->
+      <div id="pagePrivacy" class="hidden">
+        <div class="card">
+          <h2 style="margin-bottom:16px;">Privacy Policy</h2>
+          <p style="color:var(--text-muted);margin-bottom:12px;">Last updated: August 29, 2026</p>
+          <p style="margin-bottom:12px;">We collect account information, identity information (including SSN and date of birth), bank account details, and transaction data.</p>
+          <p style="margin-bottom:12px;">We use Dwolla to process bank verification and ACH transfers.</p>
+          <p>Full Privacy Policy is available at <a href="/privacy.html" style="color:#818cf8;">/privacy.html</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const BACKEND_URL = "https://payflow-backend-mg57.onrender.com";
+
+    let state = {
+      user: null,
+      balance: 0,
+      banks: [],
+      pendingBanks: [],
+      transactions: [],
+      dwollaCustomerId: null,
+      theme: localStorage.getItem("payflow_theme") || "dark"
+    };
+
+    // Sidebar
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    document.getElementById("openSidebar").addEventListener("click", () => {
+      sidebar.classList.add("open");
+      overlay.classList.add("show");
+    });
+    document.getElementById("closeSidebar").addEventListener("click", closeSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    function closeSidebar() {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+    }
+
+    function toast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 4000);
+    }
+    function save() {
+      localStorage.setItem("payflow_user", JSON.stringify(state.user));
+      localStorage.setItem("payflow_balance", state.balance);
+      localStorage.setItem("payflow_transactions", JSON.stringify(state.transactions));
+      localStorage.setItem("payflow_dwolla_customer", state.dwollaCustomerId || "");
+      localStorage.setItem("payflow_pending_banks", JSON.stringify(state.pendingBanks || []));
+      localStorage.setItem("payflow_theme", state.theme);
+    }
+    function load() {
+      const u = localStorage.getItem("payflow_user");
+      if (u) state.user = JSON.parse(u);
+      state.balance = parseFloat(localStorage.getItem("payflow_balance") || "0");
+      state.transactions = JSON.parse(localStorage.getItem("payflow_transactions") || "[]");
+      state.dwollaCustomerId = localStorage.getItem("payflow_dwolla_customer") || null;
+      state.pendingBanks = JSON.parse(localStorage.getItem("payflow_pending_banks") || "[]");
+    }
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      document.getElementById("themeToggle").textContent = theme === "dark" ? "☀️" : "🌙";
+      state.theme = theme;
+      localStorage.setItem("payflow_theme", theme);
+    }
+    function formatMoney(n) { return "$" + Number(n).toFixed(2); }
+
+    function addTransaction(type, amount, note) {
+      const tx = {
+        id: Date.now(),
+        type,
+        amount,
+        note: note || (type === 'in' ? 'Received via ACH' : 'Sent via ACH'),
+        date: new Date().toLocaleString()
+      };
+      state.transactions.unshift(tx);
+      save();
+      renderHistory();
+      return tx;
+    }
+
+    // Auth tabs
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        const isLogin = tab.dataset.tab === "login";
+        document.getElementById("loginForm").classList.toggle("hidden", !isLogin);
+        document.getElementById("signupForm").classList.toggle("hidden", isLogin);
+      });
+    });
+
+    // ========== SIGNUP (Offline-first – robust) ==========
+    document.getElementById("btnSignup").addEventListener("click", async () => {
+      const firstName = document.getElementById("signupFirstName").value.trim();
+      const lastName  = document.getElementById("signupLastName").value.trim();
+      const dob       = document.getElementById("signupDOB").value;
+      const email     = document.getElementById("signupEmail").value.trim().toLowerCase();
+      const phone     = document.getElementById("signupPhone").value.trim();
+      const ssn       = document.getElementById("signupSSN").value.trim();
+      const address   = document.getElementById("signupAddress").value.trim();
+      const password  = document.getElementById("signupPassword").value;
+      const consent   = document.getElementById("consentCheck").checked;
+      const agreement = document.getElementById("agreementCheck").checked;
+
+      if (!firstName || !lastName || !dob || !email || !phone || !ssn || !address || password.length < 8) {
+        return toast("Please fill all required fields (password min 8 chars)");
+      }
+      if (!consent || !agreement) return toast("You must accept the consent and agreement");
+
+      // Always create the account locally first so the app works offline
+      state.user = {
+        firstName, lastName,
+        fullName: firstName + " " + lastName,
+        dob, email, phone, address
+      };
+      state.dwollaCustomerId = "pending-" + Date.now();
+      state.balance = 0;
+      state.transactions = [];
+      save();
+      enterApp();
+      toast("Account created successfully!");
+
+      // Background attempt to create Dwolla customer (does not block UI)
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/create-customer`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ firstName, lastName, email })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.customerId) {
+          state.dwollaCustomerId = data.customerId;
+          save();
+          console.log("Dwolla customer ready:", data.customerId);
+        }
+      } catch (err) {
+        console.log("Backend temporarily unreachable – will retry when linking bank:", err.message);
+      }
+    });
+
+    // Login
+    document.getElementById("btnLogin").addEventListener("click", () => {
+      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+      const pass = document.getElementById("loginPassword").value;
+      if (!email || !pass) return toast("Enter email and password");
+      state.user = state.user || { fullName: email.split("@")[0], email };
+      save();
+      enterApp();
+      toast("Welcome back!");
+    });
+
+    function enterApp() {
+      document.getElementById("authScreen").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+      document.getElementById("userGreeting").textContent = "Hi, " + (state.user?.firstName || state.user?.fullName || "User");
+      updateUI();
+      loadBanks();
+      renderHistory();
+      // Restore verify form if we have pending banks
+      if (state.pendingBanks && state.pendingBanks.length > 0) {
+        const pending = state.pendingBanks[0];
+        document.getElementById("currentFundingSourceId").value = pending.stripe_payment_method_id;
+        document.getElementById("linkBankForm").style.display = "none";
+        document.getElementById("verifyMicroForm").style.display = "block";
+      }
+    }
+
+    // Logout (sidebar + top-bar)
+    function doLogout() {
+      state.user = null;
+      state.dwollaCustomerId = null;
+      state.banks = [];
+      state.pendingBanks = [];
+      state.balance = 0;
+      state.transactions = [];
+      save();
+      document.getElementById("mainApp").classList.add("hidden");
+      document.getElementById("authScreen").classList.remove("hidden");
+      closeSidebar();
+      toast("Logged out successfully");
+    }
+    document.getElementById("btnLogout").addEventListener("click", doLogout);
+    document.getElementById("btnLogoutTop").addEventListener("click", doLogout);
+
+    // Navigation
+    document.querySelectorAll(".nav-item").forEach(item => {
+      item.addEventListener("click", () => {
+        document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+        item.classList.add("active");
+        const page = item.dataset.page;
+        ["pageDashboard","pageSend","pageReceive","pageAccounts","pageTerms","pagePrivacy"].forEach(id => {
+          document.getElementById(id).classList.add("hidden");
+        });
+        document.getElementById("page" + page.charAt(0).toUpperCase() + page.slice(1)).classList.remove("hidden");
+        const titles = { dashboard:"Dashboard", send:"Send Money", receive:"Receive Money", accounts:"Link Bank Account", terms:"Terms of Service", privacy:"Privacy Policy" };
+        document.getElementById("pageTitle").textContent = titles[page] || "PayFlow";
+        closeSidebar();
+      });
+    });
+
+    document.getElementById("btnShowLinkForm").addEventListener("click", () => {
+      document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+      document.querySelector('[data-page="accounts"]').classList.add("active");
+      ["pageDashboard","pageSend","pageReceive","pageAccounts","pageTerms","pagePrivacy"].forEach(id => {
+        document.getElementById(id).classList.add("hidden");
+      });
+      document.getElementById("pageAccounts").classList.remove("hidden");
+      document.getElementById("pageTitle").textContent = "Link Bank Account";
+    });
+
+    // Add Bank – stronger customer creation + better errors
+    document.getElementById("btnAddBank").addEventListener("click", async () => {
+      const btn = document.getElementById("btnAddBank");
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+
+      try {
+        const routingNumber = document.getElementById("routingNumber").value.trim();
+        const accountNumber = document.getElementById("accountNumber").value.trim();
+        const bankAccountType = document.getElementById("accountType").value;
+        const name = document.getElementById("bankName").value.trim() || "My Bank Account";
+
+        if (!routingNumber || routingNumber.length < 9) {
+          throw new Error("Routing number must be 9 digits");
+        }
+        if (!accountNumber) throw new Error("Account number is required");
+
+        // 1. Force-create a real Dwolla customer (never use pending- for funding source)
+        toast("Creating customer...");
+        let customerId = state.dwollaCustomerId;
+
+        // Always call create-customer if we don't have a real UUID-looking ID
+        const needsCreate = !customerId || String(customerId).startsWith("pending-") || customerId.length < 20;
+
+        if (needsCreate) {
+          const res = await fetch(`${BACKEND_URL}/api/create-customer`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              firstName: state.user?.firstName || "User",
+              lastName: state.user?.lastName || "Account",
+              email: state.user?.email
+            })
+          });
+
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.error || `Could not create customer (${res.status})`);
+          }
+
+          if (!data.customerId || String(data.customerId).startsWith("pending-")) {
+            throw new Error("Dwolla did not return a customer ID. Check Dwolla keys in Render.");
+          }
+
+          customerId = data.customerId;
+          state.dwollaCustomerId = customerId;
+          save();
+        }
+
+        // 2. Add funding source
+        toast("Adding bank account...");
+        const addRes = await fetch(`${BACKEND_URL}/api/add-funding-source`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerId,
+            routingNumber,
+            accountNumber,
+            bankAccountType,
+            name,
+            userId: state.user?.email
+          })
+        });
+
+        const addData = await addRes.json().catch(() => ({}));
+        if (!addRes.ok) {
+          throw new Error(addData.error || `Server error ${addRes.status}`);
+        }
+
+        // 3. Initiate micro-deposits
+        await fetch(`${BACKEND_URL}/api/initiate-micro-deposits`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fundingSourceId: addData.fundingSourceId })
+        });
+
+        // 4. Save pending bank locally so it survives refresh
+        const pendingBank = {
+          stripe_payment_method_id: addData.fundingSourceId,
+          bank_name: name,
+          last4: accountNumber.slice(-4),
+          account_type: bankAccountType,
+          status: "pending"
+        };
+        state.pendingBanks = (state.pendingBanks || []).filter(
+          b => b.stripe_payment_method_id !== pendingBank.stripe_payment_method_id
+        );
+        state.pendingBanks.unshift(pendingBank);
+        save();
+
+        document.getElementById("currentFundingSourceId").value = addData.fundingSourceId;
+        document.getElementById("linkBankForm").style.display = "none";
+        document.getElementById("verifyMicroForm").style.display = "block";
+
+        toast("Micro-deposits initiated!");
+        renderBanks();
+        loadBanks();
+
+      } catch (err) {
+        console.error(err);
+        const msg = err.message || "Load failed";
+        if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+          toast("Backend offline. Open the backend URL once to wake it, then try again.");
+        } else {
+          toast("Error: " + msg);
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Add Bank & Start Micro-Deposits";
+      }
+    });
+
+    // Verify Micro
+    document.getElementById("btnVerifyMicro").addEventListener("click", async () => {
+      const btn = document.getElementById("btnVerifyMicro");
+      btn.disabled = true;
+      btn.textContent = "Verifying...";
+
+      try {
+        const fundingSourceId = document.getElementById("currentFundingSourceId").value;
+        const amount1 = document.getElementById("amount1").value;
+        const amount2 = document.getElementById("amount2").value;
+        if (!amount1 || !amount2) throw new Error("Enter both amounts");
+
+        const res = await fetch(`${BACKEND_URL}/api/verify-micro-deposits`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fundingSourceId, amount1, amount2 })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Verification failed");
+
+        // Keep the bank locally as verified (fallback if Supabase update fails)
+        let verifiedBank = (state.pendingBanks || []).find(b => b.stripe_payment_method_id === fundingSourceId);
+        if (!verifiedBank) {
+          verifiedBank = (state.banks || []).find(b => b.stripe_payment_method_id === fundingSourceId);
+        }
+        if (!verifiedBank) {
+          verifiedBank = {
+            stripe_payment_method_id: fundingSourceId,
+            bank_name: "Linked Bank",
+            last4: "****",
+            account_type: "checking",
+            status: "verified"
+          };
+        } else {
+          verifiedBank = { ...verifiedBank, status: "verified" };
+        }
+
+        // Remove from pending
+        state.pendingBanks = (state.pendingBanks || []).filter(b => b.stripe_payment_method_id !== fundingSourceId);
+
+        // Upsert into state.banks
+        const idx = (state.banks || []).findIndex(b => b.stripe_payment_method_id === fundingSourceId);
+        if (idx >= 0) {
+          state.banks[idx] = verifiedBank;
+        } else {
+          state.banks = state.banks || [];
+          state.banks.unshift(verifiedBank);
+        }
+        save();
+
+        document.getElementById("verifyMicroForm").style.display = "none";
+        document.getElementById("linkBankForm").style.display = "block";
+        document.getElementById("amount1").value = "";
+        document.getElementById("amount2").value = "";
+
+        toast("Bank verified successfully!");
+        renderBanks();
+        loadBanks();
+
+      } catch (err) {
+        console.error(err);
+        toast("Error: " + (err.message || "Load failed"));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Verify Bank Account";
+      }
+    });
+
+    async function loadBanks() {
+      if (!state.user?.email) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/bank-accounts/${encodeURIComponent(state.user.email)}`);
+        const data = await res.json();
+        const serverBanks = data.banks || [];
+
+        // Keep any locally-verified banks that the server doesn't know about yet
+        const localVerified = (state.banks || []).filter(b => b.status === "verified");
+        const merged = [...serverBanks];
+
+        localVerified.forEach(lb => {
+          if (!merged.find(b => b.stripe_payment_method_id === lb.stripe_payment_method_id)) {
+            merged.push(lb);
+          }
+        });
+
+        state.banks = merged;
+        renderBanks();
+      } catch (e) {
+        console.error(e);
+        // even if server fails, still render what we have locally
+        renderBanks();
+      }
+    }
+
+    function renderBanks() {
+      const list = document.getElementById("linkedBanksList");
+      const accountsList = document.getElementById("accountsPageBankList");
+      const select = document.getElementById("sendToBank");
+
+      // Merge server banks + locally-saved pending banks
+      const allBanks = [...(state.banks || [])];
+      (state.pendingBanks || []).forEach(pb => {
+        if (!allBanks.find(b => b.stripe_payment_method_id === pb.stripe_payment_method_id)) {
+          allBanks.push(pb);
+        }
+      });
+
+      if (!allBanks.length) {
+        const empty = `<p style="color:var(--text-muted);font-size:0.9rem;">No bank accounts linked yet.</p>`;
+        if (list) list.innerHTML = empty;
+        if (accountsList) accountsList.innerHTML = empty;
+        if (select) select.innerHTML = `<option value="">No linked banks</option>`;
+        return;
+      }
+
+      const html = allBanks.map(b => `
+        <div class="bank-item">
+          <div>
+            <div style="font-weight:600;">${b.bank_name || "Bank Account"}</div>
+            <div style="font-size:0.85rem;color:var(--text-muted);">•••• ${b.last4 || "****"} · ${b.account_type || "Checking"}</div>
+          </div>
+          <span class="badge ${b.status === 'verified' ? 'badge-verified' : 'badge-pending'}">
+            ${b.status === 'verified' ? 'Verified' : 'Pending'}
+          </span>
+        </div>
+      `).join("");
+
+      if (list) list.innerHTML = html;
+      if (accountsList) accountsList.innerHTML = html;
+
+      // Only verified banks can be used for send
+      if (select) {
+        select.innerHTML = allBanks
+          .filter(b => b.status === 'verified')
+          .map(b => `<option value="${b.stripe_payment_method_id}">${b.bank_name || "Bank"} •••• ${b.last4}</option>`)
+          .join("") || `<option value="">No verified banks</option>`;
+      }
+    }
+
+    function renderHistory() {
+      const list = document.getElementById("txHistoryList");
+      if (!state.transactions.length) {
+        list.innerHTML = `<p style="color:var(--text-muted);font-size:0.9rem;">No transactions yet.</p>`;
+        return;
+      }
+      list.innerHTML = state.transactions.map(tx => `
+        <div class="tx-item">
+          <div>
+            <div style="font-weight:600;">${tx.note}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">${tx.date}</div>
+          </div>
+          <div class="${tx.type === 'in' ? 'tx-in' : 'tx-out'}">${tx.type === 'in' ? '+' : '-'}${formatMoney(tx.amount)}</div>
+        </div>
+      `).join("");
+    }
+
+    // Send Money
+    document.getElementById("btnSendMoney").addEventListener("click", async () => {
+      const btn = document.getElementById("btnSendMoney");
+      const amount = parseFloat(document.getElementById("sendAmount").value);
+      const fundingSourceId = document.getElementById("sendToBank").value;
+      const note = document.getElementById("sendNote").value || "Sent via ACH";
+      if (!amount || amount <= 0) return toast("Enter a valid amount");
+      if (amount > state.balance) return toast("Insufficient balance");
+      if (!fundingSourceId) return toast("Select a verified bank account");
+
+      btn.disabled = true; btn.textContent = "Sending...";
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/create-transfer`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sourceFundingSourceId: fundingSourceId, amount, userId: state.user?.email, note })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Transfer failed");
+
+        state.balance -= amount;
+        const tx = addTransaction('out', amount, note);
+        save(); updateUI();
+
+        const receipt = document.getElementById("sendReceipt");
+        receipt.classList.remove("hidden");
+        receipt.innerHTML = `<strong>Transfer Receipt</strong><br>Amount: ${formatMoney(amount)}<br>From: PayFlow Balance<br>To: Linked Bank<br>Status: Initiated<br>Ref: ${data.transferId || tx.id}<br>Date: ${tx.date}`;
+        toast(`Successfully sent ${formatMoney(amount)}`);
+        document.getElementById("sendAmount").value = "";
+        document.getElementById("sendNote").value = "";
+      } catch (err) {
+        console.error(err);
+        toast("Error: " + (err.message || "Load failed"));
+      } finally {
+        btn.disabled = false; btn.textContent = "Send Money via ACH";
+      }
+    });
+
+    // Receive Money
+    document.getElementById("btnReceiveMoney").addEventListener("click", async () => {
+      const btn = document.getElementById("btnReceiveMoney");
+      const amount = parseFloat(document.getElementById("receiveAmount").value);
+      if (!amount || amount <= 0) return toast("Enter a valid amount");
+      const verifiedBank = state.banks.find(b => b.status === 'verified');
+      if (!verifiedBank) return toast("Please link and verify a bank first");
+
+      btn.disabled = true; btn.textContent = "Processing...";
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/receive-money`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fundingSourceId: verifiedBank.stripe_payment_method_id,
+            amount,
+            userId: state.user?.email,
+            note: "Received via ACH"
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Failed to receive");
+
+        state.balance += amount;
+        const tx = addTransaction('in', amount, "Received via ACH");
+        save(); updateUI();
+
+        const receipt = document.getElementById("receiveReceipt");
+        receipt.classList.remove("hidden");
+        receipt.innerHTML = `<strong>Receive Receipt</strong><br>Amount: ${formatMoney(amount)}<br>From: Linked Bank<br>To: PayFlow Balance<br>Status: Initiated<br>Ref: ${data.transferId || tx.id}<br>Date: ${tx.date}`;
+        toast(`Successfully received ${formatMoney(amount)}`);
+        document.getElementById("receiveAmount").value = "100";
+      } catch (err) {
+        console.error(err);
+        toast("Error: " + (err.message || "Load failed"));
+      } finally {
+        btn.disabled = false; btn.textContent = "Receive Funds via ACH";
+      }
+    });
+
+    function updateUI() {
+      document.getElementById("balanceDisplay").textContent = formatMoney(state.balance);
+      renderBanks();
+      renderHistory();
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      applyTheme(state.theme === "dark" ? "light" : "dark");
+    });
+
+    load();
+    applyTheme(state.theme);
+    if (state.user) enterApp();
+  </script>
+</body>
+</html>
