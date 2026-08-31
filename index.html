@@ -242,7 +242,10 @@
           <button class="menu-btn" id="openSidebar">☰</button>
           <h1 id="pageTitle" style="font-size:1.4rem;font-weight:700;">Dashboard</h1>
         </div>
-        <button class="theme-toggle" id="themeToggle">☀️</button>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="theme-toggle" id="themeToggle">☀️</button>
+          <button class="btn btn-danger" id="btnLogoutTop" style="width:auto;padding:8px 14px;font-size:0.85rem;">Logout</button>
+        </div>
       </div>
 
       <!-- DASHBOARD -->
@@ -321,24 +324,31 @@
       <!-- TERMS -->
       <div id="pageTerms" class="hidden">
         <div class="card">
-          <h2 style="margin-bottom:16px;">Terms of Service</h2>
-          <p style="color:var(--text-muted);margin-bottom:12px;">Last updated: August 29, 2026</p>
-          <p style="margin-bottom:12px;">Welcome to PayFlow. By using our services you agree to these Terms.</p>
-          <p style="margin-bottom:12px;"><strong>1. Service</strong><br>PayFlow allows users to link bank accounts and initiate ACH transfers.</p>
-          <p style="margin-bottom:12px;"><strong>2. Bank Linking</strong><br>By linking a bank account you authorize PayFlow and Dwolla to verify ownership and process ACH transfers.</p>
-          <p style="margin-bottom:12px;"><strong>3. Dwolla</strong><br>You also agree to Dwolla’s Terms of Service.</p>
-          <p>Full Terms are also available at <a href="/terms.html" style="color:#818cf8;">/terms.html</a></p>
+          <h2 style="margin-bottom:12px;">Terms of Service</h2>
+          <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;">
+            Last updated: August 29, 2026<br><br>
+            Welcome to PayFlow. By using our services you agree to these Terms.<br><br>
+            <strong>1. Service</strong><br>
+            PayFlow allows users to link bank accounts and initiate ACH transfers.<br><br>
+            <strong>2. Bank Linking</strong><br>
+            By linking a bank account you authorize PayFlow and Dwolla to verify ownership and process ACH transfers.<br><br>
+            <strong>3. Dwolla</strong><br>
+            You also agree to Dwolla’s Terms of Service.<br><br>
+            Full Terms are also available at <a href="/terms.html" style="color:var(--primary);">/terms.html</a>
+          </p>
         </div>
       </div>
 
       <!-- PRIVACY -->
       <div id="pagePrivacy" class="hidden">
         <div class="card">
-          <h2 style="margin-bottom:16px;">Privacy Policy</h2>
-          <p style="color:var(--text-muted);margin-bottom:12px;">Last updated: August 29, 2026</p>
-          <p style="margin-bottom:12px;">We collect account information, identity information (including SSN and date of birth), bank account details, and transaction data.</p>
-          <p style="margin-bottom:12px;">We use Dwolla to process bank verification and ACH transfers.</p>
-          <p>Full Privacy Policy is available at <a href="/privacy.html" style="color:#818cf8;">/privacy.html</a></p>
+          <h2 style="margin-bottom:12px;">Privacy Policy</h2>
+          <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;">
+            Last updated: August 29, 2026<br><br>
+            We collect account information, identity information (including SSN and date of birth), bank account details, and transaction data.<br><br>
+            We use Dwolla to process bank verification and ACH transfers.<br><br>
+            Full Privacy Policy is available at <a href="/privacy.html" style="color:var(--primary);">/privacy.html</a>
+          </p>
         </div>
       </div>
     </div>
@@ -427,33 +437,29 @@
       });
     });
 
-    // ========== SIGNUP (Offline-first – no more Load failed) ==========
+    // ========== SIGNUP (Offline-first – robust) ==========
     document.getElementById("btnSignup").addEventListener("click", async () => {
       const firstName = document.getElementById("signupFirstName").value.trim();
-      const lastName = document.getElementById("signupLastName").value.trim();
-      const dob = document.getElementById("signupDOB").value;
-      const email = document.getElementById("signupEmail").value.trim().toLowerCase();
-      const phone = document.getElementById("signupPhone").value.trim();
-      const ssn = document.getElementById("signupSSN").value.trim();
-      const address = document.getElementById("signupAddress").value.trim();
-      const password = document.getElementById("signupPassword").value;
-      const consent = document.getElementById("consentCheck").checked;
+      const lastName  = document.getElementById("signupLastName").value.trim();
+      const dob       = document.getElementById("signupDOB").value;
+      const email     = document.getElementById("signupEmail").value.trim().toLowerCase();
+      const phone     = document.getElementById("signupPhone").value.trim();
+      const ssn       = document.getElementById("signupSSN").value.trim();
+      const address   = document.getElementById("signupAddress").value.trim();
+      const password  = document.getElementById("signupPassword").value;
+      const consent   = document.getElementById("consentCheck").checked;
       const agreement = document.getElementById("agreementCheck").checked;
 
       if (!firstName || !lastName || !dob || !email || !phone || !ssn || !address || password.length < 8) {
-        return toast("Please fill all required fields");
+        return toast("Please fill all required fields (password min 8 chars)");
       }
       if (!consent || !agreement) return toast("You must accept the consent and agreement");
 
-      // Create account locally first so the app works
+      // Always create the account locally first so the app works offline
       state.user = {
-        firstName,
-        lastName,
+        firstName, lastName,
         fullName: firstName + " " + lastName,
-        dob,
-        email,
-        phone,
-        address
+        dob, email, phone, address
       };
       state.dwollaCustomerId = "pending-" + Date.now();
       state.balance = 0;
@@ -462,7 +468,7 @@
       enterApp();
       toast("Account created successfully!");
 
-      // Try Dwolla in the background (optional)
+      // Background attempt to create Dwolla customer (does not block UI)
       try {
         const res = await fetch(`${BACKEND_URL}/api/create-customer`, {
           method: "POST",
@@ -473,9 +479,10 @@
         if (res.ok && data.customerId) {
           state.dwollaCustomerId = data.customerId;
           save();
+          console.log("Dwolla customer ready:", data.customerId);
         }
       } catch (err) {
-        console.log("Dwolla create failed (will retry later):", err.message);
+        console.log("Backend temporarily unreachable – will retry when linking bank:", err.message);
       }
     });
 
@@ -499,15 +506,21 @@
       renderHistory();
     }
 
-    // Logout
-    document.getElementById("btnLogout").addEventListener("click", () => {
+    // Logout (sidebar + top-bar)
+    function doLogout() {
       state.user = null;
+      state.dwollaCustomerId = null;
+      state.banks = [];
+      state.balance = 0;
+      state.transactions = [];
       save();
       document.getElementById("mainApp").classList.add("hidden");
       document.getElementById("authScreen").classList.remove("hidden");
       closeSidebar();
       toast("Logged out successfully");
-    });
+    }
+    document.getElementById("btnLogout").addEventListener("click", doLogout);
+    document.getElementById("btnLogoutTop").addEventListener("click", doLogout);
 
     // Navigation
     document.querySelectorAll(".nav-item").forEach(item => {
@@ -658,10 +671,10 @@
       if (list) list.innerHTML = html;
       if (accountsList) accountsList.innerHTML = html;
 
-      const verified = state.banks.filter(b => b.status === 'verified');
-      select.innerHTML = verified.length
-        ? verified.map(b => `<option value="${b.stripe_payment_method_id}">${b.bank_name || "Bank"} •••• ${b.last4 || ""}</option>`).join("")
-        : `<option value="">No verified banks</option>`;
+      select.innerHTML = state.banks
+        .filter(b => b.status === 'verified')
+        .map(b => `<option value="${b.stripe_payment_method_id}">${b.bank_name || "Bank"} •••• ${b.last4}</option>`)
+        .join("") || `<option value="">No verified banks</option>`;
     }
 
     function renderHistory() {
@@ -676,7 +689,9 @@
             <div style="font-weight:600;">${tx.note}</div>
             <div style="font-size:0.8rem;color:var(--text-muted);">${tx.date}</div>
           </div>
-          <div class="${tx.type === 'in' ? 'tx-in' : 'tx-out'}">${tx.type === 'in' ? '+' : '-'}${formatMoney(tx.amount)}</div>
+          <div class="${tx.type === 'in' ? 'tx-in' : 'tx-out'}">
+            ${tx.type === 'in' ? '+' : '-'}${formatMoney(tx.amount)}
+          </div>
         </div>
       `).join("");
     }
@@ -685,28 +700,33 @@
     document.getElementById("btnSendMoney").addEventListener("click", async () => {
       const btn = document.getElementById("btnSendMoney");
       const amount = parseFloat(document.getElementById("sendAmount").value);
-      const fundingSourceId = document.getElementById("sendToBank").value;
-      const note = document.getElementById("sendNote").value || "Sent via ACH";
+      const bankId = document.getElementById("sendToBank").value;
+      const note = document.getElementById("sendNote").value;
       if (!amount || amount <= 0) return toast("Enter a valid amount");
+      if (!bankId) return toast("Select a verified bank account");
       if (amount > state.balance) return toast("Insufficient balance");
-      if (!fundingSourceId) return toast("Select a verified bank account");
 
-      btn.disabled = true; btn.textContent = "Sending...";
+      btn.disabled = true; btn.textContent = "Processing...";
       try {
         const res = await fetch(`${BACKEND_URL}/api/create-transfer`, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sourceFundingSourceId: fundingSourceId, amount, userId: state.user?.email, note })
+          body: JSON.stringify({
+            sourceFundingSourceId: bankId,
+            amount,
+            userId: state.user?.email,
+            note
+          })
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || "Transfer failed");
+        if (!res.ok) throw new Error(data.error || "Failed to send");
 
         state.balance -= amount;
-        const tx = addTransaction('out', amount, note);
+        const tx = addTransaction('out', amount, note || "Sent via ACH");
         save(); updateUI();
 
         const receipt = document.getElementById("sendReceipt");
         receipt.classList.remove("hidden");
-        receipt.innerHTML = `<strong>Transfer Receipt</strong><br>Amount: ${formatMoney(amount)}<br>From: PayFlow Balance<br>To: Linked Bank<br>Status: Initiated<br>Ref: ${data.transferId || tx.id}<br>Date: ${tx.date}`;
+        receipt.innerHTML = `<strong>Send Receipt</strong><br>Amount: ${formatMoney(amount)}<br>To: Linked Bank<br>Status: Initiated<br>Ref: ${data.transferId || tx.id}<br>Date: ${tx.date}`;
         toast(`Successfully sent ${formatMoney(amount)}`);
         document.getElementById("sendAmount").value = "";
         document.getElementById("sendNote").value = "";
